@@ -1,0 +1,15 @@
+# Build files
+cmake_install.cmake
+CMakeFiles
+CMakeCache.txt
+Makefile
+build/
+
+# Executables
+bin/
+
+# Mac
+DS_Store/
+
+# VS
+.vscode/

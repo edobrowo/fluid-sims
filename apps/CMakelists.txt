@@ -1,0 +1,7 @@
+file(GLOB APPS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/*)
+
+foreach(APP ${APPS})
+    if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${APP})
+        add_subdirectory(${APP})
+    endif()
+endforeach()
