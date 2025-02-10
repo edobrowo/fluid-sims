@@ -9,6 +9,8 @@
 #include "util/format.hpp"
 #include "util/stringbuffer.hpp"
 
+namespace gl {
+
 enum class ShaderKind {
     Vertex = GL_VERTEX_SHADER,
     TessControl = GL_TESS_CONTROL_SHADER,
@@ -558,5 +560,7 @@ struct UniformVectorWriter<Matrix<f64, p, q>, length> {
         glep();
     }
 };
+
+}
 
 }

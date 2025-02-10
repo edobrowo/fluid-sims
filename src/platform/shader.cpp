@@ -1,5 +1,7 @@
 #include "platform/shader.hpp"
 
+using namespace gl;
+
 ShaderProgram::ShaderProgram() {
     mHandle = glCreateProgram();
     glep();
