@@ -128,20 +128,15 @@ int main() {
     glep();
 
     // Stam RTFD 2D solver -----------------------------------------------------
-    constexpr u32 N = 20;
+    constexpr u32 N = 100;
     StamRTFDSolver<N> solver;
+    solver.init();
 
-    Grid<f32, N> sources;
-    sources.fill(0.0f);
-    sources(10, 10) = 10.0f;
-
-    solver.setSources(sources, 0.1f);
-
-    // Texture
-    // -----------------------------------------------------------------
+    // Texture -----------------------------------------------------------------
     Texture texture;
-    std::vector<GLubyte> tex_data(10 * 10 * 4);
     program.setUniform<i32>("sampler", 0);
+
+    std::vector<GLubyte> tex_data(N * N * 3);
 
     // Render loop -------------------------------------------------------------
     gl::Mesh gl_mesh(quad_mesh);
@@ -167,15 +162,23 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glep();
 
-        for (Index i = 0; i < 100; ++i) {
-            tex_data[i * 4] = static_cast<GLubyte>(i);
-            tex_data[i * 4 + 1] = static_cast<GLubyte>(i);
-            tex_data[i * 4 + 2] = static_cast<GLubyte>(i);
-            tex_data[i * 4 + 3] = 255;
+        solver.reset();
+
+        for (Index row = 1; row <= N; ++row) {
+            for (Index col = 1; col <= N; ++col) {
+                const Index i = (row - 1) * N + (col - 1);
+                const GLubyte d = static_cast<GLubyte>(
+                    math::clamp(solver.density()(row, col), 0.0f, 1.0f) *
+                    255.0f);
+                tex_data[i * 3] = static_cast<GLubyte>(d);
+                tex_data[i * 3 + 1] = static_cast<GLubyte>(d);
+                tex_data[i * 3 + 2] = static_cast<GLubyte>(d);
+            }
         }
 
-        texture.bind(0);
-        texture.image(10, 10, tex_data.data());
+        solver.step();
+
+        texture.image(N, N, tex_data.data());
         texture.bind(0);
 
         gl_mesh.render();

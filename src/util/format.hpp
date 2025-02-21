@@ -99,7 +99,7 @@ public:
     /// @param sb Buffer for the format string.
     /// @param ...args Format string arguments.
     template <typename... Targs>
-    void format(StringBuffer& sb, Targs... args) {
+    void format(StringBuffer& sb, const Targs&... args) {
         std::vector<Token> tokens = parseFormatString(mFormatString, mLength);
 
         u32 num_args = sizeof...(args);
@@ -121,7 +121,7 @@ public:
         (
             [&] {
                 i = writeLiterals(sb, tokens, i);
-                FormatWriter<decltype(args)>::write(args, sb);
+                FormatWriter<std::decay_t<decltype(args)>>::write(args, sb);
                 ++i;
             }(),
             ...);
@@ -167,7 +167,7 @@ private:
 /// @param ...args Format string arguments.
 /// @return Formatted string.
 template <typename... Targs>
-std::string format(const char* format_string, Targs... args) {
+std::string format(const char* format_string, const Targs&... args) {
     Formatter formatter(format_string, std::strlen(format_string));
     StringBuffer sb;
 
@@ -187,7 +187,7 @@ std::string format(const char* format_string, Targs... args) {
 /// @param ...args Format string arguments.
 /// @return Formatted string.
 template <typename... Targs>
-void format(StringBuffer& sb, const char* format_string, Targs... args) {
+void format(StringBuffer& sb, const char* format_string, const Targs&... args) {
     Formatter formatter(format_string, std::strlen(format_string));
     try {
         formatter.format(sb, args...);
@@ -202,7 +202,7 @@ void format(StringBuffer& sb, const char* format_string, Targs... args) {
 /// @param format_string Format string.
 /// @param ...args Format string arguments.
 template <typename... Targs>
-void println(const char* format_string, Targs... args) {
+void println(const char* format_string, const Targs&... args) {
     StringBuffer sb;
     format(sb, format_string, args...);
     std::cout << sb.str() << '\n';
@@ -213,7 +213,7 @@ void println(const char* format_string, Targs... args) {
 /// @param format_string Format string.
 /// @param ...args Format string arguments.
 template <typename... Targs>
-void print(const char* format_string, Targs... args) {
+void print(const char* format_string, const Targs&... args) {
     StringBuffer sb;
     format(sb, format_string, args...);
     std::cout << sb.str();
@@ -224,7 +224,7 @@ void print(const char* format_string, Targs... args) {
 /// @param format_string Format string.
 /// @param ...args Format string arguments.
 template <typename... Targs>
-void eprintln(const char* format_string, Targs... args) {
+void eprintln(const char* format_string, const Targs&... args) {
     StringBuffer sb;
     format(sb, format_string, args...);
     std::cerr << sb.str() << std::endl;
@@ -235,7 +235,7 @@ void eprintln(const char* format_string, Targs... args) {
 /// @param format_string Format string.
 /// @param ...args Format string arguments.
 template <typename... Targs>
-void eprint(const char* format_string, Targs... args) {
+void eprint(const char* format_string, const Targs&... args) {
     StringBuffer sb;
     format(sb, format_string, args...);
     std::cerr << sb.str() << std::flush;
