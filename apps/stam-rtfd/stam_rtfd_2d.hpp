@@ -44,11 +44,21 @@ public:
     }
 
     void init() {
-        mDensity(1, 1) = 2000.0f;
-        mDensity(10, 5) = 2000.0f;
-        mDensity(11, 2) = 2000.0f;
         mUPrev.fill(2.0f);
         mVPrev.fill(-2.0f);
+    }
+
+    void addDensity(const Index row, const Index col, const f32 d) {
+        if (row > sDim || col > sDim)
+            return;
+        mDensity(row, col) += d;
+    }
+
+    void addVelocity(const Index row, const Index col, const Vector2D& v) {
+        if (row > sDim || col > sDim)
+            return;
+        mU(row, col) = v[0];
+        mV(row, col) = v[1];
     }
 
 private:

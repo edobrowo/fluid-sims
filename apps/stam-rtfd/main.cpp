@@ -19,13 +19,10 @@
 constexpr int gWindowWidth = 800;
 constexpr int gWindowHeight = 600;
 
-void on_glfw_error(int error_code, const char* description) {
-    eprintln("GLFW error {}: {}", error_code, description);
-}
-
-void on_framebuffer_size_change(GLFWwindow* window, int width, int height) {
-    glViewport(0, 0, width, height);
-}
+Vector2D gPrevMousePos(0.0f);
+Vector2D gMousePos(0.0f);
+bool gMouseButtons[GLFW_MOUSE_BUTTON_LAST + 1];
+i32 gKeyMods = 0;
 
 std::string read_file_to_string(const char* path) {
     std::ifstream file_stream;
@@ -66,6 +63,11 @@ public:
     ~Quad() = default;
 };
 
+void on_glfw_error(int error_code, const char* description);
+void on_framebuffer_size_change(GLFWwindow* window, int width, int height);
+void on_cursor_move(GLFWwindow* window, double xpos, double ypos);
+void on_mouse_button(GLFWwindow* window, int button, int action, int mods);
+
 int main() {
     // GLFW --------------------------------------------------------------------
 
@@ -102,6 +104,8 @@ int main() {
     }
 
     glfwSetFramebufferSizeCallback(window, on_framebuffer_size_change);
+    glfwSetCursorPosCallback(window, on_cursor_move);
+    glfwSetMouseButtonCallback(window, on_mouse_button);
 
     // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -164,12 +168,37 @@ int main() {
 
         solver.reset();
 
+        if (gMouseButtons[GLFW_MOUSE_BUTTON_RIGHT]) {
+            const Index col = gMousePos[0] / static_cast<f32>(gWindowWidth) * N;
+            const Index row =
+                N - gMousePos[1] / static_cast<f32>(gWindowHeight) * N;
+            solver.addDensity(row, col, 10.0f);
+        }
+
+        // GUI ideas:
+        // - force attenuation
+        // - borders on or off
+        // - fluid fidelity
+        // - fluid color
+        // - gravity
+
+        if (gMouseButtons[GLFW_MOUSE_BUTTON_LEFT]) {
+            const Vector2D force = Vector2D(gMousePos[0] - gPrevMousePos[0],
+                                            gPrevMousePos[1] - gMousePos[1]) /
+                                   2.0f;
+            const Index col = gMousePos[0] / static_cast<f32>(gWindowWidth) * N;
+            const Index row =
+                N - gMousePos[1] / static_cast<f32>(gWindowHeight) * N;
+            solver.addVelocity(row, col, force);
+        }
+
         for (Index row = 1; row <= N; ++row) {
             for (Index col = 1; col <= N; ++col) {
                 const Index i = (row - 1) * N + (col - 1);
-                const GLubyte d = static_cast<GLubyte>(
+                GLubyte d = static_cast<GLubyte>(
                     math::clamp(solver.density()(row, col), 0.0f, 1.0f) *
                     255.0f);
+                // d = d / 5 * 5;
                 tex_data[i * 3] = static_cast<GLubyte>(d);
                 tex_data[i * 3 + 1] = static_cast<GLubyte>(d);
                 tex_data[i * 3 + 2] = static_cast<GLubyte>(d);
@@ -189,4 +218,22 @@ int main() {
 
     glfwTerminate();
     return 0;
+}
+
+void on_glfw_error(int error_code, const char* description) {
+    eprintln("GLFW error {}: {}", error_code, description);
+}
+
+void on_framebuffer_size_change(GLFWwindow* window, int width, int height) {
+    glViewport(0, 0, width, height);
+}
+
+void on_cursor_move(GLFWwindow* window, double xpos, double ypos) {
+    gPrevMousePos = gMousePos;
+    gMousePos = Vector2D(static_cast<f32>(xpos), static_cast<f32>(ypos));
+}
+
+void on_mouse_button(GLFWwindow* window, int button, int action, int mods) {
+    gMouseButtons[button] = action == GLFW_PRESS;
+    gKeyMods = static_cast<i32>(mods);
 }
