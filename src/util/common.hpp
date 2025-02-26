@@ -5,63 +5,57 @@
 #include <iostream>
 #include <type_traits>
 
-/// Fixed-size signed integral types.
+/// @brief 8-bit signed integral type.
 using i8 = int8_t;
+/// @brief 16-bit signed integral type.
 using i16 = int16_t;
+/// @brief 32-bit signed integral type.
 using i32 = int32_t;
+/// @brief 64-bit signed integral type.
 using i64 = int64_t;
 
-/// Fixed-size unsigned integral types.
+/// @brief 8-bit unsigned integral type.
 using u8 = uint8_t;
+/// @brief 16-bit unsigned integral type.
 using u16 = uint16_t;
+/// @brief 32-bit unsigned integral type.
 using u32 = uint32_t;
+/// @brief 64-bit unsigned integral type.
 using u64 = uint64_t;
 
-/// Fixed-size float types.
+/// @brief 32-bit floating-point real type.
 using f32 = float;
+/// @brief 64-bit floating-point real type.
 using f64 = double;
 
-/// Indicates the memory size of a container.
+/// @brief Container size.
 using Size = uint64_t;
 
-/// Indicates a type-based index into a container.
+/// @brief Index into a contiguous container.
 using Index = uint64_t;
 
-/// Any integral or floating numeric type.
+/// @brief Integral or floating-point type.
 template <typename T>
 concept Numeric = std::integral<T> || std::floating_point<T>;
 
-/// Any signed integral type.
+/// @brief Signed integral type.
 template <typename T>
 concept SignedIntegral = std::integral<T> && std::is_signed_v<T>;
 
-/// Any unsigned integral type.
+/// @brief Unsigned integral type.
 template <typename T>
 concept UnsignedIntegral = std::integral<T> && std::is_unsigned_v<T>;
+
+// clang-format off
 
 #define TO_STR_INNER(X) #X
 #define TO_STR(X) TO_STR_INNER(X)
 
-#define SOURCE_LOC                                                             \
-    __FILE__                                                                   \
+#define SOURCE_LOC               \
+    __FILE__                     \
     " : " TO_STR(__LINE__)
 
-/// Basic assertion.
-// clang-format off
-#define assert(X)                \
-    if (!(X)) {                  \
-        std::cout <<             \
-            "assertion failed: " \
-            #X                   \
-            "\n"                 \
-            SOURCE_LOC           \
-            "\n";                \
-        std::exit(1);            \
-    }
-// clang-format on
-
-/// Basic assertion with a log message.
-// clang-format off
+/// @brief Basic assertion with a log message.
 #define assertm(X, M)            \
     if (!(X)) {                  \
         std::cout <<             \
@@ -74,18 +68,16 @@ concept UnsignedIntegral = std::integral<T> && std::is_unsigned_v<T>;
             "\n";                \
         std::exit(1);            \
     }
-// clang-format on
 
-/// Unimplemented indicator.
-// clang-format off
+/// @brief Unimplemented code.
 #define unimplemented std::cout <<          \
     "control reached unimplemented code:\n" \
     SOURCE_LOC                              \
     "\n";                                   \
     std::exit(1);
-// clang-format on
 
-// https://en.cppreference.com/w/cpp/utility/unreachable
+/// @brief Indicates that this path of control flow should not be compiled.
+/// @cite https://en.cppreference.com/w/cpp/utility/unreachable
 [[noreturn]] static inline void unreachable_internal() {
 #if defined(_MSC_VER) && !defined(__clang__)  // MSVC
     __assume(false);
@@ -94,6 +86,7 @@ concept UnsignedIntegral = std::integral<T> && std::is_unsigned_v<T>;
 #endif
 }
 
-// clang-format off
+/// @brief Indicates that this path of control flow should not be compiled.
 #define unreachable unreachable_internal();
+
 // clang-format on

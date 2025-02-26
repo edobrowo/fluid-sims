@@ -53,13 +53,13 @@ constexpr inline T lerp(T t, T a, T b) {
 
 template <Numeric T>
 constexpr inline T scale(T value, T min, T max) {
-    assert(max - min != 0);
+    assertm(max - min != 0, "max - min is 0");
     return (value - min) / (max - min);
 }
 
 template <Numeric T>
 constexpr inline T map(T value, T min1, T max1, T min2, T max2) {
-    assert(max1 - min1 != 0);
+    assertm(max1 - min1 != 0, "max1 - min1 is 0");
     return min2 + (value - min1) / (max1 - min1) * (max2 - min2);
 }
 

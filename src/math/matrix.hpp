@@ -111,7 +111,7 @@ Matrix<T, p, q>& Matrix<T, p, q>::operator*=(const T& rhs) {
 
 template <std::floating_point T, u32 p, u32 q>
 Matrix<T, p, q>& Matrix<T, p, q>::operator*=(const Matrix<T, p, q>& rhs) {
-    assert(p == q);
+    assertm(p == q, "matrix dimensions do not match");
     return *this = *this * rhs;
 }
 
@@ -308,10 +308,10 @@ static Matrix<T, q, p> transpose(const Matrix<T, p, q>& value) {
 template <std::floating_point T, u32 p1, u32 q1, u32 p2, u32 q2>
 static Matrix<T, p2, q2> embed_zero(const Matrix<T, p1, q1>& value,
                                     const Index x, const Index y) {
-    assert(x < p1);
-    assert(p1 <= p2);
-    assert(y < q1);
-    assert(q1 <= q2);
+    assertm(x < p1, "x not less than p1");
+    assertm(p1 <= p2, "p1 not less than or equal to p2");
+    assertm(y < q1, "y not less than q1");
+    assertm(q1 <= q2, "q1 not less than or equal to q2");
     Matrix<T, p2, q2> result;
     for (Index row = x; row < p1; ++row)
         for (Index col = y; col < q1; ++col) result(row, col) = value(row, col);
@@ -321,9 +321,9 @@ static Matrix<T, p2, q2> embed_zero(const Matrix<T, p1, q1>& value,
 template <std::floating_point T, u32 dim1, u32 dim2>
 static Matrix<T, dim2, dim2> embed_ident(const Matrix<T, dim1, dim1>& value,
                                          const Index x, const Index y) {
-    assert(x < dim1);
-    assert(y < dim1);
-    assert(dim1 <= dim2);
+    assertm(x < dim1, "x not less than dim1");
+    assertm(y < dim1, "y not less than dim1");
+    assertm(dim1 <= dim2, "dim1 not less than or equal to dim2");
     Matrix<T, dim2, dim2> result = ident<T, dim2>();
     for (Index row = x; row < dim1; ++row)
         for (Index col = y; col < dim1; ++col)

@@ -1,0 +1,9 @@
+{
+    "timestep": 0.1,
+    "viscosity": 0.0,
+    "diffusion_rate": 0.001,
+    "gauss_seidel_iterations": 20,
+
+    "density_increment": 10.0,
+    "force_multiplier": 0.5
+}

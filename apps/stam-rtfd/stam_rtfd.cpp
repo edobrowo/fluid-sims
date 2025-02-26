@@ -16,13 +16,22 @@ StamRTFD::StamRTFD() : mTexData(N * N * 3) {
 void StamRTFD::init() {
     glfwSetInputMode(mWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
+    files::Json config =
+        files::read_to_json("apps/stam-rtfd/assets/config.json");
+    mConfig.timestep = config["timestep"];
+    mConfig.viscosity = config["viscosity"];
+    mConfig.diffusion = config["diffusion_rate"];
+    mConfig.gaussSeidelIterations = config["gauss_seidel_iterations"];
+    mConfig.densityIncrement = config["density_increment"];
+    mConfig.forceMultiplier = config["force_multiplier"];
+
     // Shader program
     std::string vertex_shader =
-        read_file_to_string("apps/stam-rtfd/shaders/shader.vs");
+        files::read_to_string(asset("shaders/shader.vs").c_str());
     mProgram.addStage(gl::ShaderKind::Vertex, vertex_shader.c_str());
 
     std::string fragment_shader =
-        read_file_to_string("apps/stam-rtfd/shaders/shader.fs");
+        files::read_to_string(asset("shaders/shader.fs").c_str());
     mProgram.addStage(gl::ShaderKind::Fragment, fragment_shader.c_str());
 
     mProgram.build();
@@ -43,7 +52,7 @@ void StamRTFD::init() {
     mQuadMesh = Quad();
 
     // Solver
-    mSolver.init();
+    mSolver.init(mConfig.gaussSeidelIterations);
 
     // Texture
     mProgram.setUniform<i32>("sampler", 0);
@@ -56,13 +65,13 @@ void StamRTFD::update() {
         const Index col = mMousePos[0] / static_cast<f32>(mWindowWidth) * N;
         const Index row =
             N - mMousePos[1] / static_cast<f32>(mWindowHeight) * N;
-        mSolver.addDensity(row, col, 10.0f);
+        mSolver.addDensity(row, col, mConfig.densityIncrement);
     }
 
     if (mMouseButtons[GLFW_MOUSE_BUTTON_LEFT]) {
         const Vector2D force = Vector2D(mMousePos[0] - mPrevMousePos[0],
-                                        mPrevMousePos[1] - mMousePos[1]) /
-                               2.0f;
+                                        mPrevMousePos[1] - mMousePos[1]) *
+                               mConfig.forceMultiplier;
         const Index col = mMousePos[0] / static_cast<f32>(mWindowWidth) * N;
         const Index row =
             N - mMousePos[1] / static_cast<f32>(mWindowHeight) * N;
@@ -80,7 +89,7 @@ void StamRTFD::update() {
         }
     }
 
-    mSolver.step();
+    mSolver.step(mConfig.timestep, mConfig.viscosity, mConfig.diffusion);
 }
 
 void StamRTFD::draw() {

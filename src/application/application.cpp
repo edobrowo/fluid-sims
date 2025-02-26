@@ -71,6 +71,10 @@ void Application::quit() const {
     glfwSetWindowShouldClose(mWindow, true);
 }
 
+std::string Application::asset(const char* path) const {
+    return mRootPath + "/assets/" + path;
+}
+
 std::shared_ptr<Application> Application::getInstance() {
     if (mInstance == nullptr)
         mInstance = std::shared_ptr<Application>(new Application());

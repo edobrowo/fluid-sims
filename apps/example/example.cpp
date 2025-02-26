@@ -26,11 +26,11 @@ void Example::init() {
 
     // Shader program
     std::string vertex_shader =
-        read_file_to_string("apps/example/shaders/shader.vs");
+        files::read_to_string(asset("shaders/shader.fs").c_str());
     mProgram.addStage(gl::ShaderKind::Vertex, vertex_shader.c_str());
 
     std::string fragment_shader =
-        read_file_to_string("apps/example/shaders/shader.fs");
+        files::read_to_string(asset("shaders/shader.fs").c_str());
     mProgram.addStage(gl::ShaderKind::Fragment, fragment_shader.c_str());
 
     mProgram.build();

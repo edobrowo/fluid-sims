@@ -59,14 +59,14 @@ Vector<T, dim>::Vector(T value) {
 
 template <std::floating_point T, u32 dim>
 Vector<T, dim>::Vector(const T c1, const T c2) {
-    assert(dim == 2);
+    assertm(dim == 2, "dim not equal to 2");
     mComponents[0] = c1;
     mComponents[1] = c2;
 }
 
 template <std::floating_point T, u32 dim>
 Vector<T, dim>::Vector(const T c1, const T c2, const T c3) {
-    assert(dim == 3);
+    assertm(dim == 3, "dim not equal to 3");
     mComponents[0] = c1;
     mComponents[1] = c2;
     mComponents[2] = c3;
@@ -74,7 +74,7 @@ Vector<T, dim>::Vector(const T c1, const T c2, const T c3) {
 
 template <std::floating_point T, u32 dim>
 Vector<T, dim>::Vector(const T c1, const T c2, const T c3, const T c4) {
-    assert(dim == 4);
+    assertm(dim == 4, "dim not equal to 4");
     mComponents[0] = c1;
     mComponents[1] = c2;
     mComponents[2] = c3;
@@ -99,13 +99,13 @@ Vector<T, dim>& Vector<T, dim>::operator=(const Vector<T, dim>& other) {
 
 template <std::floating_point T, u32 dim>
 T Vector<T, dim>::operator[](const Index i) const {
-    assert(i < dim);
+    assertm(i < dim, "i not less than dim");
     return mComponents[i];
 }
 
 template <std::floating_point T, u32 dim>
 T& Vector<T, dim>::operator[](const Index i) {
-    assert(i < dim);
+    assertm(i < dim, "i not less than dim");
     return mComponents[i];
 }
 

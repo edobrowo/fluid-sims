@@ -26,7 +26,8 @@ public:
     /// @param ...args Application arguments.
     template <ApplicationSubclass T, typename... Args>
     static void launch(const u32 width, const u32 height,
-                       const std::string& title, f32 fps, Args&&... args);
+                       const std::string& title, f32 fps,
+                       const std::string& root_path, Args&&... args);
 
 protected:
     Application();
@@ -62,6 +63,9 @@ protected:
     /// @brief Quits the application.
     void quit() const;
 
+    /// @brief Retrieves the full path to the specified asset.
+    std::string asset(const char* path) const;
+
     GLFWwindow* mWindow;
     std::string mWindowTitle;
     u32 mWindowWidth;
@@ -90,7 +94,7 @@ private:
     /// @param fps Framerate.
     template <ApplicationSubclass T, typename... Args>
     static void run(const u32 width, const u32 height, const std::string& title,
-                    f32 fps, Args&&... args);
+                    f32 fps, const std::string& root_path, Args&&... args);
 
     /// @brief Register all GLFW callbacks.
     void registerGlfwCallbacks();
@@ -110,19 +114,23 @@ private:
 
     static std::shared_ptr<Application> mInstance;
     GLFWmonitor* mMonitor;
+    std::string mRootPath;
 };
 
 template <ApplicationSubclass T, typename... Args>
 void Application::launch(const u32 width, const u32 height,
-                         const std::string& title, f32 fps, Args&&... args) {
+                         const std::string& title, f32 fps,
+                         const std::string& root_path, Args&&... args) {
     if (mInstance == nullptr) {
-        Application::run<T, Args...>(width, height, title, fps, args...);
+        Application::run<T, Args...>(width, height, title, fps, root_path,
+                                     args...);
     }
 }
 
 template <ApplicationSubclass T, typename... Args>
 void Application::run(const u32 width, const u32 height,
-                      const std::string& title, f32 fps, Args&&... args) {
+                      const std::string& title, f32 fps,
+                      const std::string& root_path, Args&&... args) {
     if (!glfwInit()) {
         eprintln("failed to initialize GLFW");
         return;
@@ -172,6 +180,7 @@ void Application::run(const u32 width, const u32 height,
     mInstance->mFramebufferWidth = static_cast<u32>(framebuffer_width);
     mInstance->mFramebufferHeight = static_cast<u32>(framebuffer_height);
     mInstance->mMonitor = monitor;
+    mInstance->mRootPath = root_path;
 
     mInstance->registerGlfwCallbacks();
 

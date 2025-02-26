@@ -38,4 +38,15 @@ private:
     bool mMouseButtons[GLFW_MOUSE_BUTTON_LAST + 1];
     Vector2D mPrevMousePos;
     Vector2D mMousePos;
+
+    struct Config {
+        f32 timestep;
+        f32 viscosity;
+        f32 diffusion;
+        u32 gaussSeidelIterations;
+
+        f32 densityIncrement;
+        f32 forceMultiplier;
+
+    } mConfig;
 };

@@ -32,9 +32,9 @@ public:
         return mDensity;
     }
 
-    void step() {
-        stepVelocity(mU, mV, mUPrev, mVPrev, 0.0f, 0.1f);
-        stepDensity(mDensity, mDensityPrev, mU, mV, 0.001f, 0.1f);
+    void step(const f32 timestep, const f32 viscosity, const f32 diffusion) {
+        stepVelocity(mU, mV, mUPrev, mVPrev, viscosity, timestep);
+        stepDensity(mDensity, mDensityPrev, mU, mV, diffusion, timestep);
     }
 
     void reset() {
@@ -43,9 +43,8 @@ public:
         mDensityPrev.fill(0.0f);
     }
 
-    void init() {
-        mUPrev.fill(2.0f);
-        mVPrev.fill(-2.0f);
+    void init(u32 gauss_seidel_iterations) {
+        mGaussSeidelIterations = gauss_seidel_iterations;
     }
 
     void addDensity(const Index row, const Index col, const f32 d) {
@@ -86,6 +85,8 @@ private:
     Grid<N> mVPrev;
     Grid<N> mDensity;
     Grid<N> mDensityPrev;
+
+    u32 mGaussSeidelIterations;
 };
 
 template <u32 N>
@@ -133,7 +134,7 @@ template <u32 N>
 void StamRTFDSolver<N>::diffuse(const u32 b, Grid<N>& x, Grid<N>& x0,
                                 const f32 diffusion, const f32 dt) {
     const f32 a = dt * diffusion * N * N;
-    for (Index k = 0; k < 20; ++k) {
+    for (Index k = 0; k < mGaussSeidelIterations; ++k) {
         for (Index row = 1; row <= N; ++row)
             for (Index col = 1; col <= N; ++col)
                 x(row, col) =
@@ -185,7 +186,7 @@ void StamRTFDSolver<N>::project(Grid<N>& u, Grid<N>& v, Grid<N>& p,
     setBoundary(0, div);
     setBoundary(0, p);
 
-    for (Index k = 0; k < 20; ++k) {
+    for (Index k = 0; k < mGaussSeidelIterations; ++k) {
         for (Index row = 1; row <= N; ++row)
             for (Index col = 1; col <= N; ++col)
                 p(row, col) =
