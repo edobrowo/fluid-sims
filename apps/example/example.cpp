@@ -39,8 +39,7 @@ void Example::init() {
     glep();
 
     // Vertex data and attributes
-    geometry::Cube cube_mesh;
-    mCubeMesh = cube_mesh;
+    mCubeMesh = geometry::Cube();
 }
 
 void Example::update() {
