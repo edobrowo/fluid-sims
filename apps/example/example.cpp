@@ -22,11 +22,10 @@ Example::~Example() {
 
 void Example::init() {
     glfwSetInputMode(mWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwSetInputMode(mWindow, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
     // Shader program
     std::string vertex_shader =
-        files::read_to_string(asset("shaders/shader.fs").c_str());
+        files::read_to_string(asset("shaders/shader.vs").c_str());
     mProgram.addStage(gl::ShaderKind::Vertex, vertex_shader.c_str());
 
     std::string fragment_shader =
