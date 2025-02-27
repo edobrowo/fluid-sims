@@ -16,8 +16,7 @@ StamRTFD::StamRTFD() : mTexData(N * N * 3) {
 void StamRTFD::init() {
     glfwSetInputMode(mWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
-    files::Json config =
-        files::read_to_json("apps/stam-rtfd/assets/config.json");
+    files::Json config = files::read_to_json(asset("config.json").c_str());
     mConfig.timestep = config["timestep"];
     mConfig.viscosity = config["viscosity"];
     mConfig.diffusion = config["diffusion_rate"];
