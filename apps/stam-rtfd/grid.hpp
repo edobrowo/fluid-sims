@@ -53,5 +53,6 @@ struct FormatWriter<Grid<N>> {
             if (row < N + 1)
                 sb.putSafe('\n');
         }
+        sb.putSafe('[');
     }
 };
