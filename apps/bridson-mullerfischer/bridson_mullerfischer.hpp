@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "application/application.hpp"
+#include "config.hpp"
 #include "geometry/camera.hpp"
 #include "platform/mesh.hpp"
 #include "platform/shader.hpp"
@@ -34,9 +35,5 @@ private:
     Vector2D mPrevMousePos;
     Vector2D mMousePos;
 
-    struct Config {
-        f32 timestep;
-        u32 gridRows;
-        u32 gridCols;
-    } mConfig;
+    Config mConfig;
 };

@@ -24,11 +24,11 @@ f32 MACGrid::temperature(const Vector2D& pos) const {
     return mT.interp(pos);
 }
 
-Vector2D MACGrid::traceParticle(const Vector2D& pos, const f32 dt) const {
-    // Use RK2
+// TODO: clamp (?)
+Vector2D MACGrid::backtrace(const Vector2D& pos, const f32 dt) const {
+    // Use RK2.
     const Vector2D& v1 = velocity(pos);
-    const f32 half_dt = 0.5f * dt;
-    const Vector2D& v2 =
-        velocity(Vector2D(pos[0] + half_dt * v1[0], pos[1] + half_dt * v1[1]));
+    const Vector2D& v2 = velocity(
+        Vector2D(pos[0] + 0.5f * dt * v1[0], pos[1] + 0.5f * dt * v1[1]));
     return pos + dt * v2;
 }

@@ -17,18 +17,18 @@ public:
 
     ~Grid();
 
-    Size rows() const;
-    f32 height() const;
-
     Size cols() const;
     f32 width() const;
+
+    Size rows() const;
+    f32 height() const;
 
     f32 cellSize() const;
 
     f32* data();
 
-    f32 operator()(const Index row, const Index col) const;
-    f32& operator()(const Index row, const Index col);
+    f32 operator()(const Index x, const Index y) const;
+    f32& operator()(const Index x, const Index y);
 
     f32 interp(const Vector2D& pos) const;
 
@@ -58,13 +58,13 @@ template <>
 struct FormatWriter<Grid> {
     static void write(const Grid& grid, StringBuffer& sb) {
         sb.putSafe('[');
-        for (Index row = 0; row < grid.rows(); ++row) {
-            for (Index col = 0; col < grid.cols(); ++col) {
-                FormatWriter<f32>::write(grid(row, col), sb);
-                if (row * grid.cols() + col < grid.rows() * grid.cols() - 1)
+        for (Index y = 0; y < grid.rows(); ++y) {
+            for (Index x = 0; x < grid.cols(); ++x) {
+                FormatWriter<f32>::write(grid(x, y), sb);
+                if (y * grid.cols() + x < grid.rows() * grid.cols() - 1)
                     sb.putSafe(',');
             }
-            if (row < grid.rows() - 1)
+            if (y < grid.rows() - 1)
                 sb.putSafe('\n');
             else
                 sb.putSafe(']');

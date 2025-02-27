@@ -10,9 +10,9 @@ void BridsonMullerFischer::init() {
     glfwSetInputMode(mWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
     files::Json config = files::read_to_json(asset("config.json").c_str());
+    mConfig.rows = config["grid_rows"];
+    mConfig.cols = config["grid_cols"];
     mConfig.timestep = config["timestep"];
-    mConfig.gridRows = config["grid_rows"];
-    mConfig.gridCols = config["grid_cols"];
 
     // Shader program
     std::string vertex_shader =
@@ -41,14 +41,14 @@ void BridsonMullerFischer::init() {
     mQuadMesh = Quad();
 
     // Texture
-    mTexData.resize(mConfig.gridRows * mConfig.gridCols * 3);
+    mTexData.resize(mConfig.rows * mConfig.cols * 3);
     mProgram.setUniform<i32>("sampler", 0);
 }
 
 void BridsonMullerFischer::update() {
-    for (Index row = 0; row < mConfig.gridRows; ++row) {
-        for (Index col = 0; col < mConfig.gridCols; ++col) {
-            const Index i = row * mConfig.gridCols + col;
+    for (Index row = 0; row < mConfig.rows; ++row) {
+        for (Index col = 0; col < mConfig.cols; ++col) {
+            const Index i = row * mConfig.cols + col;
             const GLubyte d = 100;
             mTexData[i * 3] = d;
             mTexData[i * 3 + 1] = d;
@@ -58,7 +58,7 @@ void BridsonMullerFischer::update() {
 }
 
 void BridsonMullerFischer::draw() {
-    mTexture.image(mConfig.gridRows, mConfig.gridCols, mTexData.data());
+    mTexture.image(mConfig.rows, mConfig.cols, mTexData.data());
     mTexture.bind(0);
 
     mQuadMesh.render();

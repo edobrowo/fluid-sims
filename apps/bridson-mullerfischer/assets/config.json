@@ -1,5 +1,5 @@
 {
-    "timestep": 0.1,
     "grid_rows": 100,
-    "grid_cols": 100
+    "grid_cols": 100,
+    "timestep": 0.1
 }

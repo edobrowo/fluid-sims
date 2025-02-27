@@ -11,6 +11,7 @@ Grid::Grid(const Size rows, const Size cols, const Vector2D& cell_center,
       mCellCenter(cell_center.clamped(0.0f, 1.0f)),
       mCellSize(cell_size),
       mData(new f32[rows * cols]) {
+    assertm(mCellSize != 0.0f, "cell size must be nonzero");
 }
 
 Grid::Grid(const Size rows, const Size cols, const f32 cell_size)
@@ -19,6 +20,7 @@ Grid::Grid(const Size rows, const Size cols, const f32 cell_size)
       mCellCenter(Vector2D(0.5f, 0.5f)),
       mCellSize(cell_size),
       mData(new f32[rows * cols]) {
+    assertm(mCellSize != 0.0f, "cell size must be nonzero");
 }
 
 Grid::Grid(const Grid& other)
@@ -43,20 +45,20 @@ Grid::~Grid() {
     delete[] mData;
 }
 
-Size Grid::rows() const {
-    return mRows;
-}
-
-f32 Grid::height() const {
-    return static_cast<float>(mRows) * mCellSize;
-}
-
 Size Grid::cols() const {
     return mCols;
 }
 
 f32 Grid::width() const {
     return static_cast<float>(mCols) * mCellSize;
+}
+
+Size Grid::rows() const {
+    return mRows;
+}
+
+f32 Grid::height() const {
+    return static_cast<float>(mRows) * mCellSize;
 }
 
 f32 Grid::cellSize() const {
@@ -67,18 +69,18 @@ f32* Grid::data() {
     return mData;
 }
 
-f32 Grid::operator()(const Index row, const Index col) const {
+f32 Grid::operator()(const Index x, const Index y) const {
     // TODO: Return user-defined default.
-    if (row < mRows || col < mCols)
+    if (y >= mRows || x >= mCols)
         return 0.0f;
-    return mData[row * mCols + col];
+    return mData[y * mCols + x];
 }
 
-f32& Grid::operator()(const Index row, const Index col) {
+f32& Grid::operator()(const Index x, const Index y) {
     // TODO: (Maybe) clamp the non-significant axis to [0, col/row].
-    assertm(row < mRows, "row out of bounds");
-    assertm(col < mCols, "col out of bounds");
-    return mData[row * mCols + col];
+    assertm(x < mCols, "x out of bounds");
+    assertm(y < mRows, "y out of bounds");
+    return mData[y * mCols + x];
 }
 
 f32 Grid::interp(const Vector2D& pos) const {
@@ -93,15 +95,16 @@ f32 Grid::interp(const Vector2D& pos) const {
     const f32 t = (pos[0] - x0) / mCellSize;
     const f32 s = (pos[1] - y0) / mCellSize;
 
-    const f32 v00 = (*this)(cell00[1], cell00[0]);
-    const f32 v01 = (*this)(cell01[1], cell01[0]);
-    const f32 v10 = (*this)(cell10[1], cell10[0]);
-    const f32 v11 = (*this)(cell11[1], cell11[0]);
+    const f32 v00 = (*this)(cell00[0], cell00[1]);
+    const f32 v01 = (*this)(cell01[0], cell01[1]);
+    const f32 v10 = (*this)(cell10[0], cell10[1]);
+    const f32 v11 = (*this)(cell11[0], cell11[1]);
 
     return (1 - t) * (1 - s) * v00 + (1 - t) * s * v01 + t * (1 - s) * v10 +
            t * s * v11;
 }
 
+// TODO: far out of bounds positions will yield (10, 10)
 Vector2u Grid::cell(const Vector2D& pos) const {
     const Vector2D cell_coords = toGridSpace(pos) / mCellSize;
     return Vector2u(static_cast<Index>(cell_coords[0]),

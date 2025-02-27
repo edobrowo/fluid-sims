@@ -14,7 +14,7 @@ public:
     f32 density(const Vector2D& pos) const;
     f32 temperature(const Vector2D& pos) const;
 
-    Vector2D traceParticle(const Vector2D& pos, const f32 dt) const;
+    Vector2D backtrace(const Vector2D& pos, const f32 dt) const;
 
 private:
     /// @brief Velocity x-component.

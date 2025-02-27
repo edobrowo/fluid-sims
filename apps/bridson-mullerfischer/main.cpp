@@ -1,6 +1,4 @@
 #include "bridson_mullerfischer.hpp"
-#include "grid.hpp"
-#include "util/format.hpp"
 
 int main() {
     BridsonMullerFischer::launch<BridsonMullerFischer>(
