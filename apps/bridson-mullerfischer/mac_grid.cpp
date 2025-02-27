@@ -9,7 +9,5 @@ MACGrid::MACGrid(const Size rows, const Size cols, const f32 cell_size)
 }
 
 Vector2D MACGrid::velocity(const Vector2D& pos) const {
-    return Vector2D(
-        //
-    );
+    return Vector2D(mU.interp(pos), mV.interp(pos));
 }

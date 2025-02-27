@@ -67,15 +67,15 @@ f32* Grid::data() {
     return mData;
 }
 
-// TODO: return default instead?
 f32 Grid::operator()(const Index row, const Index col) const {
-    assertm(row < mRows, "row out of bounds");
-    assertm(col < mCols, "col out of bounds");
+    // TODO: Return user-defined default.
+    if (row < mRows || col < mCols)
+        return 0.0f;
     return mData[row * mCols + col];
 }
 
-// TODO: return default instead?
 f32& Grid::operator()(const Index row, const Index col) {
+    // TODO: (Maybe) clamp the non-significant axis to [0, col/row].
     assertm(row < mRows, "row out of bounds");
     assertm(col < mCols, "col out of bounds");
     return mData[row * mCols + col];
