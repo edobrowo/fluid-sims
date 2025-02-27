@@ -33,11 +33,11 @@ constexpr inline T step(T value, T threshold) {
 }
 
 template <Numeric T>
-constexpr inline T clamp(T value, T left, T right) {
-    if (value < left)
-        return left;
-    else if (value > right)
-        return right;
+constexpr inline T clamp(T value, T low, T high) {
+    if (value < low)
+        return low;
+    else if (value > high)
+        return high;
     return value;
 }
 
