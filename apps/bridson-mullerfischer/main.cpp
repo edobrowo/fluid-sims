@@ -1,4 +1,5 @@
 #include "bridson_mullerfischer.hpp"
+#include "solver.hpp"
 
 int main() {
     BridsonMullerFischer::launch<BridsonMullerFischer>(

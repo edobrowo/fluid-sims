@@ -11,6 +11,8 @@ Grid::Grid(const Size rows, const Size cols, const Vector2D& cell_center,
       mCellCenter(cell_center.clamped(0.0f, 1.0f)),
       mCellSize(cell_size),
       mData(new f32[rows * cols]) {
+    assertm(mRows > 0, "number of rows must be positive");
+    assertm(mCols > 0, "number of cols must be positive");
     assertm(mCellSize != 0.0f, "cell size must be nonzero");
 }
 
@@ -20,6 +22,8 @@ Grid::Grid(const Size rows, const Size cols, const f32 cell_size)
       mCellCenter(Vector2D(0.5f, 0.5f)),
       mCellSize(cell_size),
       mData(new f32[rows * cols]) {
+    assertm(mRows > 0, "number of rows must be positive");
+    assertm(mCols > 0, "number of cols must be positive");
     assertm(mCellSize != 0.0f, "cell size must be nonzero");
 }
 
@@ -49,24 +53,24 @@ Size Grid::cols() const {
     return mCols;
 }
 
-f32 Grid::width() const {
-    return static_cast<float>(mCols) * mCellSize;
-}
-
 Size Grid::rows() const {
     return mRows;
 }
 
-f32 Grid::height() const {
-    return static_cast<float>(mRows) * mCellSize;
+Size Grid::size() const {
+    return mCols * mRows;
 }
 
 f32 Grid::cellSize() const {
     return mCellSize;
 }
 
-f32* Grid::data() {
-    return mData;
+f32 Grid::width() const {
+    return static_cast<float>(mCols) * mCellSize;
+}
+
+f32 Grid::height() const {
+    return static_cast<float>(mRows) * mCellSize;
 }
 
 f32 Grid::operator()(const Index x, const Index y) const {
@@ -116,6 +120,18 @@ Vector2D Grid::toGridSpace(const Vector2D& pos) const {
         .clamped(Vector2D(0.0f), Vector2D(width(), height()));
 }
 
+f32 Grid::max() const {
+    return *std::max_element(mData, mData + size());
+}
+
+f32 Grid::min() const {
+    return *std::min_element(mData, mData + size());
+}
+
 void Grid::fill(const f32 value) {
     std::fill_n(mData, mRows * mCols, value);
+}
+
+f32* Grid::data() {
+    return mData;
 }

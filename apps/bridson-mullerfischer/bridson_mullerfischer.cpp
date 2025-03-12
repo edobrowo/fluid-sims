@@ -43,6 +43,8 @@ void BridsonMullerFischer::init() {
     // Texture
     mTexData.resize(mConfig.rows * mConfig.cols * 3);
     mProgram.setUniform<i32>("sampler", 0);
+
+    mSolver = std::make_unique<Solver>(mConfig);
 }
 
 void BridsonMullerFischer::update() {

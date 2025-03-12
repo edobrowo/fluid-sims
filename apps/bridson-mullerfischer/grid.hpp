@@ -17,25 +17,55 @@ public:
 
     ~Grid();
 
+    /// @brief Number of columns in the grid.
     Size cols() const;
-    f32 width() const;
 
+    /// @brief Number of rows in the grid.
     Size rows() const;
-    f32 height() const;
 
+    /// @brief Number of cells in the grid. Equal to rows() * cols().
+    Size size() const;
+
+    /// @brief Size of a cell in world space.
     f32 cellSize() const;
 
-    f32* data();
+    /// @brief Width of the grid in world space. Equal to cols() * cellSize().
+    f32 width() const;
 
+    /// @brief Height of the grid in world space. Equal to rows() * cellSize().
+    f32 height() const;
+
+    /// @brief Retrives the value at cell indices (x, y).
     f32 operator()(const Index x, const Index y) const;
+
+    /// @brief Retrives a mutable reference to the value at cell indices (x, y).
     f32& operator()(const Index x, const Index y);
 
+    /// @brief Finds the grid value at the given worldspace position. Uses
+    /// bilinear interpolation.
+    /// @param pos Worldspace position.
+    /// @return Computed value at the worldspace position.
     f32 interp(const Vector2D& pos) const;
 
+    /// @brief Determines the cell coordinate index pair at the given world
+    /// position.
     Vector2u cell(const Vector2D& pos) const;
+
+    /// @brief Determines the gridspace position of a worldspace position.
     Vector2D toGridSpace(const Vector2D& pos) const;
 
+    /// @brief Max value in the grid.
+    f32 max() const;
+
+    /// @brief Minimum value in the grid.
+    f32 min() const;
+
+    /// @brief Fill the grid with a constant value.
+    /// @param value Fill value.
     void fill(const f32 value);
+
+    /// @brief Retrieve a pointer to the internal buffer.
+    f32* data();
 
 private:
     /// @brief Number of rows in the grid.
@@ -61,7 +91,7 @@ struct FormatWriter<Grid> {
         for (Index y = 0; y < grid.rows(); ++y) {
             for (Index x = 0; x < grid.cols(); ++x) {
                 FormatWriter<f32>::write(grid(x, y), sb);
-                if (y * grid.cols() + x < grid.rows() * grid.cols() - 1)
+                if (y * grid.cols() + x < grid.size() - 1)
                     sb.putSafe(',');
             }
             if (y < grid.rows() - 1)

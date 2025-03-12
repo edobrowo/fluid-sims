@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 
 #include "application/application.hpp"
@@ -8,6 +9,7 @@
 #include "platform/mesh.hpp"
 #include "platform/shader.hpp"
 #include "platform/texture.hpp"
+#include "solver.hpp"
 
 class BridsonMullerFischer : public Application {
 public:
@@ -35,5 +37,6 @@ private:
     Vector2D mPrevMousePos;
     Vector2D mMousePos;
 
+    std::unique_ptr<Solver> mSolver;
     Config mConfig;
 };
