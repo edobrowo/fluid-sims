@@ -4,27 +4,27 @@
 
 #include "math/common.hpp"
 
-Grid::Grid(const Size rows, const Size cols, const Vector2D& cell_center,
+Grid::Grid(const i32 rows, const i32 cols, const Vector2D& cell_center,
            const f32 cell_size)
     : mRows(rows),
       mCols(cols),
       mCellCenter(cell_center.clamped(0.0f, 1.0f)),
-      mCellSize(cell_size),
-      mData(new f32[rows * cols]) {
+      mCellSize(cell_size) {
     assertm(mRows > 0, "number of rows must be positive");
     assertm(mCols > 0, "number of cols must be positive");
     assertm(mCellSize != 0.0f, "cell size must be nonzero");
+    mData = new f32[rows * cols];
 }
 
-Grid::Grid(const Size rows, const Size cols, const f32 cell_size)
+Grid::Grid(const i32 rows, const i32 cols, const f32 cell_size)
     : mRows(rows),
       mCols(cols),
       mCellCenter(Vector2D(0.5f, 0.5f)),
-      mCellSize(cell_size),
-      mData(new f32[rows * cols]) {
+      mCellSize(cell_size) {
     assertm(mRows > 0, "number of rows must be positive");
     assertm(mCols > 0, "number of cols must be positive");
     assertm(mCellSize != 0.0f, "cell size must be nonzero");
+    mData = new f32[rows * cols];
 }
 
 Grid::Grid(const Grid& other)
@@ -49,15 +49,15 @@ Grid::~Grid() {
     delete[] mData;
 }
 
-Size Grid::cols() const {
+i32 Grid::cols() const {
     return mCols;
 }
 
-Size Grid::rows() const {
+i32 Grid::rows() const {
     return mRows;
 }
 
-Size Grid::size() const {
+i32 Grid::size() const {
     return mCols * mRows;
 }
 
@@ -73,25 +73,27 @@ f32 Grid::height() const {
     return static_cast<float>(mRows) * mCellSize;
 }
 
-f32 Grid::operator()(const Index x, const Index y) const {
-    // TODO: Return user-defined default.
-    if (y >= mRows || x >= mCols)
-        return 0.0f;
+f32 Grid::operator()(const i32 x, const i32 y) const {
+    assertm(x >= 0, "x out of bounds");
+    assertm(x < mCols, "x out of bounds");
+    assertm(y >= 0, "y out of bounds");
+    assertm(y < mRows, "y out of bounds");
     return mData[y * mCols + x];
 }
 
-f32& Grid::operator()(const Index x, const Index y) {
-    // TODO: (Maybe) clamp the non-significant axis to [0, col/row].
+f32& Grid::operator()(const i32 x, const i32 y) {
+    assertm(x >= 0, "x out of bounds");
     assertm(x < mCols, "x out of bounds");
+    assertm(y >= 0, "y out of bounds");
     assertm(y < mRows, "y out of bounds");
     return mData[y * mCols + x];
 }
 
 f32 Grid::interp(const Vector2D& pos) const {
-    const Vector2u cell00 = cell(pos);
-    const Vector2u cell01 = cell00 + Vector2u(0, 1);
-    const Vector2u cell10 = cell00 + Vector2u(1, 0);
-    const Vector2u cell11 = cell00 + Vector2u(1, 1);
+    const Vector2i cell00 = positionToCell(pos);
+    const Vector2i cell01 = cell00 + Vector2i(0, 1);
+    const Vector2i cell10 = cell00 + Vector2i(1, 0);
+    const Vector2i cell11 = cell00 + Vector2i(1, 1);
 
     const f32 x0 = mCellSize * static_cast<f32>(cell00[0]);
     const f32 y0 = mCellSize * static_cast<f32>(cell00[1]);
@@ -108,16 +110,24 @@ f32 Grid::interp(const Vector2D& pos) const {
            t * s * v11;
 }
 
-// TODO: far out of bounds positions will yield (10, 10)
-Vector2u Grid::cell(const Vector2D& pos) const {
-    const Vector2D cell_coords = toGridSpace(pos) / mCellSize;
-    return Vector2u(static_cast<Index>(cell_coords[0]),
-                    static_cast<Index>(cell_coords[1]));
+Vector2D Grid::cellToPosition(const Vector2i& cell) const {
+    const Vector2D cell_coords(static_cast<float>(cell[0]),
+                               static_cast<float>(cell[1]));
+    const Vector2D pos = (cell_coords + mCellCenter) * mCellSize;
+    return pos;
 }
 
-Vector2D Grid::toGridSpace(const Vector2D& pos) const {
-    return (pos - mCellCenter * mCellSize)
-        .clamped(Vector2D(0.0f), Vector2D(width(), height()));
+Vector2i Grid::positionToCell(const Vector2D& pos) const {
+    const Vector2D adjusted_pos = pos - mCellCenter * mCellSize;
+
+    const Vector2D bounds = Vector2D(width() - cBoundsFactor * mCellSize,
+                                     height() - cBoundsFactor * mCellSize);
+    const Vector2D clamped_pos = adjusted_pos.clamped(Vector2D(0.0f), bounds);
+
+    const Vector2D cell_coords = clamped_pos / mCellSize;
+
+    return Vector2i(static_cast<i32>(cell_coords[0]),
+                    static_cast<i32>(cell_coords[1]));
 }
 
 f32 Grid::max() const {
@@ -130,6 +140,14 @@ f32 Grid::min() const {
 
 void Grid::fill(const f32 value) {
     std::fill_n(mData, mRows * mCols, value);
+}
+
+void Grid::fill(const Vector2i& lower, const Vector2i& upper, const f32 value) {
+    for (i32 y = lower[1]; y < upper[1]; ++y) {
+        for (i32 x = lower[0]; x < upper[0]; ++x) {
+            (*this)(x, y) = value;
+        }
+    }
 }
 
 f32* Grid::data() {

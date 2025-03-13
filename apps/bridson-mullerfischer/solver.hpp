@@ -12,7 +12,6 @@ public:
     /// @brief Updates the solver by mTimestep.
     void step();
 
-private:
     /// @brief Advects vector field q through the MAC grid velocity field
     ///  for the time interval given by mTimestep.
     /// @param u Velocity field.
@@ -31,4 +30,6 @@ private:
 
     /// @brief Timestep that the solver is advanced by each step.
     f32 mTimestep;
+
+private:
 };

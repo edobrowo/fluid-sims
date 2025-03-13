@@ -8,9 +8,9 @@
 
 class Grid {
 public:
-    Grid(const Size rows, const Size cols, const Vector2D& cell_center,
+    Grid(const i32 rows, const i32 cols, const Vector2D& cell_center,
          const f32 cell_size);
-    Grid(const Size rows, const Size cols, const f32 cell_size);
+    Grid(const i32 rows, const i32 cols, const f32 cell_size);
     Grid(const Grid& other);
 
     Grid& operator=(const Grid& other);
@@ -18,13 +18,13 @@ public:
     ~Grid();
 
     /// @brief Number of columns in the grid.
-    Size cols() const;
+    i32 cols() const;
 
     /// @brief Number of rows in the grid.
-    Size rows() const;
+    i32 rows() const;
 
     /// @brief Number of cells in the grid. Equal to rows() * cols().
-    Size size() const;
+    i32 size() const;
 
     /// @brief Size of a cell in world space.
     f32 cellSize() const;
@@ -36,23 +36,26 @@ public:
     f32 height() const;
 
     /// @brief Retrives the value at cell indices (x, y).
-    f32 operator()(const Index x, const Index y) const;
+    f32 operator()(const i32 x, const i32 y) const;
 
     /// @brief Retrives a mutable reference to the value at cell indices (x, y).
-    f32& operator()(const Index x, const Index y);
+    f32& operator()(const i32 x, const i32 y);
 
     /// @brief Finds the grid value at the given worldspace position. Uses
-    /// bilinear interpolation.
+    /// bilinear interpolation. Performs extrapolation by clamping. That is,
+    /// finding the closest point on the boundary of the grid and interpolating
+    /// with the corresponding cell.
     /// @param pos Worldspace position.
     /// @return Computed value at the worldspace position.
     f32 interp(const Vector2D& pos) const;
 
-    /// @brief Determines the cell coordinate index pair at the given world
-    /// position.
-    Vector2u cell(const Vector2D& pos) const;
+    /// @brief Determines the worldspace position at the given cell coordinate
+    /// index pair.
+    Vector2D cellToPosition(const Vector2i& cell) const;
 
-    /// @brief Determines the gridspace position of a worldspace position.
-    Vector2D toGridSpace(const Vector2D& pos) const;
+    /// @brief Determines the cell coordinate index pair at the given world
+    /// position. Clamps at the boundaries.
+    Vector2i positionToCell(const Vector2D& pos) const;
 
     /// @brief Max value in the grid.
     f32 max() const;
@@ -64,15 +67,25 @@ public:
     /// @param value Fill value.
     void fill(const f32 value);
 
+    /// @brief Fill the sub-grid with a constant value.
+    /// @param lower Lower index pair.
+    /// @param upper Upper index pair.
+    /// @param value Fill value.
+    void fill(const Vector2i& lower, const Vector2i& upper, const f32 value);
+
     /// @brief Retrieve a pointer to the internal buffer.
     f32* data();
 
 private:
+    /// @brief Factor to multiple mCellSize for clamping worldspace position to
+    /// cell coordinates.
+    const f32 cBoundsFactor = 1.001f;
+
     /// @brief Number of rows in the grid.
-    Size mRows;
+    i32 mRows;
 
     /// @brief Number of columns in the grid.
-    Size mCols;
+    i32 mCols;
 
     /// @brief Normalized (on [0, 1]) coordinates of the cell center.
     Vector2D mCellCenter;

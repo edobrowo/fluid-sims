@@ -1,6 +1,6 @@
 #include "mac_grid.hpp"
 
-MACGrid::MACGrid(const Size rows, const Size cols, const f32 cell_size)
+MACGrid::MACGrid(const i32 rows, const i32 cols, const f32 cell_size)
     : mU(rows, cols + 1, Vector2D(0.0f, 0.5f), cell_size),
       mV(rows + 1, cols, Vector2D(0.5f, 0.0f), cell_size),
       mP(rows, cols, cell_size),
@@ -13,19 +13,19 @@ MACGrid::MACGrid(const Size rows, const Size cols, const f32 cell_size)
       mCellSize(cell_size) {
 }
 
-Size MACGrid::cols() const {
+i32 MACGrid::cols() const {
     return mCols;
 }
 
-Size MACGrid::rows() const {
+i32 MACGrid::rows() const {
     return mRows;
 }
 
-Size MACGrid::facesX() const {
+i32 MACGrid::facesX() const {
     return mFacesX;
 }
 
-Size MACGrid::facesY() const {
+i32 MACGrid::facesY() const {
     return mFacesY;
 }
 
@@ -41,20 +41,15 @@ f32 MACGrid::height() const {
     return mRows * mCellSize;
 }
 
-// TODO: cell center?
-Vector2D MACGrid::cellPosition(const Index x, const Index y) const {
-    return Vector2D(x * mCellSize, y * mCellSize);
-}
-
-bool MACGrid::isCellInBounds(const Index x, const Index y) const {
+bool MACGrid::isCellInBounds(const i32 x, const i32 y) const {
     return x < mCols && y < mRows;
 }
 
-bool MACGrid::isFaceXInBounds(const Index x, const Index y) const {
+bool MACGrid::isFaceXInBounds(const i32 x, const i32 y) const {
     return x < mFacesX;
 }
 
-bool MACGrid::isFaceYInBounds(const Index x, const Index y) const {
+bool MACGrid::isFaceYInBounds(const i32 x, const i32 y) const {
     return y < mFacesY;
 }
 
@@ -74,9 +69,9 @@ f32 MACGrid::temperature(const Vector2D& pos) const {
     return mT.interp(pos);
 }
 
-// TODO: clamp (?)
-// TODO: use RK3
+// TODO: RK3
 Vector2D MACGrid::backtrace(const Vector2D& pos, const f32 dt) const {
+    // Integrate back in time with RK2.
     const Vector2D& pos_mid = pos - 0.5f * dt * velocity(pos);
     const Vector2D& pos_orig = pos - dt * velocity(pos_mid);
     return pos_orig;

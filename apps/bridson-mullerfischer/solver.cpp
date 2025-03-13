@@ -22,16 +22,19 @@ void Solver::step() {
 }
 
 Grid Solver::advect(const Grid& q) const {
-    println("{}", mTimestep);
     Grid q_p = q;
-    for_all_faces {
-        println("({}, {})", x, y);
-        // TODO: cell center?
-        const Vector2D pos = mGrid.cellPosition(x, y);
-        const Vector2D x_p = mGrid.backtrace(pos, mTimestep);
-        q_p(x, y) = q.interp(x_p);
+
+    for (i32 y = 0; y < q.rows(); ++y) {
+        for (i32 x = 0; x < q.cols(); ++x) {
+            // Determime the position corresponding to the current cell.
+            const Vector2D pos = q.cellToPosition(Vector2i(x, y));
+
+            // Integrate in time with mU.
+            const Vector2D initial_pos = mGrid.backtrace(pos, mTimestep);
+
+            // Interpolate from from the grid and set the new value.
+            q_p(x, y) = q.interp(initial_pos);
+        }
     }
     return q_p;
 }
-
-// TODO: on page 37

@@ -1,7 +1,7 @@
 #include "bridson_mullerfischer.hpp"
 
 #include "quad.hpp"
-#include "util/files.hpp"
+// #include "util/files.hpp"
 
 BridsonMullerFischer::BridsonMullerFischer() {
 }
@@ -9,19 +9,20 @@ BridsonMullerFischer::BridsonMullerFischer() {
 void BridsonMullerFischer::init() {
     glfwSetInputMode(mWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
-    files::Json config = files::read_to_json(asset("config.json").c_str());
-    mConfig.rows = config["grid_rows"];
-    mConfig.cols = config["grid_cols"];
-    mConfig.timestep = config["timestep"];
+    // files::Json config = files::read_to_json(asset("config.json").c_str());
+    // mConfig.rows = config["grid_rows"];
+    // mConfig.cols = config["grid_cols"];
+    // mConfig.cellSize = config["cell_size"];
+    // mConfig.timestep = config["timestep"];
 
-    // Shader program
-    std::string vertex_shader =
-        files::read_to_string(asset("shaders/shader.vs").c_str());
-    mProgram.addStage(gl::ShaderKind::Vertex, vertex_shader.c_str());
+    // // Shader program
+    // std::string vertex_shader =
+    //     files::read_to_string(asset("shaders/shader.vs").c_str());
+    // mProgram.addStage(gl::ShaderKind::Vertex, vertex_shader.c_str());
 
-    std::string fragment_shader =
-        files::read_to_string(asset("shaders/shader.fs").c_str());
-    mProgram.addStage(gl::ShaderKind::Fragment, fragment_shader.c_str());
+    // std::string fragment_shader =
+    //     files::read_to_string(asset("shaders/shader.fs").c_str());
+    // mProgram.addStage(gl::ShaderKind::Fragment, fragment_shader.c_str());
 
     mProgram.build();
 
@@ -44,7 +45,7 @@ void BridsonMullerFischer::init() {
     mTexData.resize(mConfig.rows * mConfig.cols * 3);
     mProgram.setUniform<i32>("sampler", 0);
 
-    mSolver = std::make_unique<Solver>(mConfig);
+    // mSolver = std::make_unique<Solver>(mConfig);
 }
 
 void BridsonMullerFischer::update() {
