@@ -11,10 +11,10 @@
 #include "platform/texture.hpp"
 #include "solver.hpp"
 
-class BridsonMullerFischer : public Application {
+class BridsonDensity : public Application {
 public:
-    BridsonMullerFischer();
-    ~BridsonMullerFischer() = default;
+    BridsonDensity();
+    ~BridsonDensity() = default;
 
     virtual void init() override;
     virtual void update() override;
