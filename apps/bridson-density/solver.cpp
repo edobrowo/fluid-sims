@@ -35,6 +35,8 @@ void Solver::project() {
     const f32 scale =
         mTimestep / (mDensity * mMac.cellSize() * mMac.cellSize());
 
+    // Solve Poisson equation for pressure projection using Gauss-Seidel
+    // iteration.
     f32 max_delta = 0.0f;
     for (Index iter = 0; iter < MAX_GS_ITER; ++iter) {
         max_delta = 0.0f;
