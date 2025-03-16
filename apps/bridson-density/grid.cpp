@@ -199,7 +199,7 @@ void Grid::add(const Vector2D& world_pos, const Vector2D& size,
 
     for (i32 iy = low[1]; iy < upp[1]; ++iy) {
         for (i32 ix = low[0]; ix < upp[0]; ++ix) {
-            if ((*this)(ix, iy) < std::fabs(value))
+            if (std::fabs((*this)(ix, iy)) < std::fabs(value))
                 (*this)(ix, iy) = value;
         }
     }
