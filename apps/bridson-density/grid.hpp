@@ -39,13 +39,13 @@ public:
     /// @brief Retrieve a pointer to the internal buffer.
     f32* data();
 
-    /// @brief Finds the grid value at the given gridspace position using
-    /// bilinear interpolation. Performs extrapolation by clamping; that is, by
-    /// finding the closest point on the boundary of the grid and interpolating
-    /// with the corresponding cell.
-    /// @param pos Worldspace position.
-    /// @return Computed value at the worldspace position.
-    f32 interp(const Vector2D& grid_pos) const;
+    /// @brief Converts a worldspace position to a normalized gridspace
+    /// position.
+    Vector2D toGridSpace(const Vector2D& world_pos) const;
+
+    /// @brief Converts a gridspace position to a normalized worldspace
+    /// position.
+    Vector2D toWorldSpace(const Vector2D& grid_pos) const;
 
     /// @brief Advects the grid through the specified velocity field
     ///  for the given time step, producing a new grid.
@@ -53,14 +53,6 @@ public:
     /// @param v Velocity field along the y axis.
     /// @return Grid at the updated state.
     Grid advect(const Grid& u, const Grid& v, const f32 dt);
-
-    /// @brief Converts a worldspace position to a normalized gridspace
-    /// position. Clamps positions to the grid boundaries.
-    Vector2D toGridSpace(const Vector2D& world_pos) const;
-
-    /// @brief Converts a gridspace position to a normalized worldspace
-    /// position.
-    Vector2D toWorldSpace(const Vector2D& grid_pos) const;
 
     /// @brief Fill the grid with a constant value.
     /// @param value Fill value.
@@ -79,17 +71,31 @@ public:
     f32 min() const;
 
 private:
+    /// @brief Finds the grid value at the given gridspace position using
+    /// bilinear interpolation. Performs extrapolation by clamping; that is, by
+    /// finding the closest point on the boundary of the grid and interpolating
+    /// with the corresponding cell.
+    /// @param pos Worldspace position.
+    /// @return Computed value at the worldspace position.
+    f32 interp(const Vector2D& grid_pos) const;
+
+    /// @brief Offset used to clamp gridspace positions to cell coordinates.
+    const f32 cGridClampOffset = 1.001f;
+
+    /// @brief Clamps the gridspace coordinates to be within grid boundaries.
+    Vector2D clampToGrid(const Vector2D& grid_pos) const;
+
     /// @brief Determines the initial position of an imaginary particle with
     /// current position pos integrated back in time by dt.
-    Vector2D backtrace(const Vector2D& world_pos, const Grid& u, const Grid& v,
+    Vector2D backtrace(const Vector2D& grid_pos, const Grid& u, const Grid& v,
                        const f32 dt) const;
 
     /// @brief Integrates back in time using Euler.
-    Vector2D euler(const Vector2D& world_pos, const Grid& u, const Grid& v,
+    Vector2D euler(const Vector2D& grid_pos, const Grid& u, const Grid& v,
                    const f32 dt) const;
 
     /// @brief Integrates back in time with 2nd order Runge-Kutta.
-    Vector2D RK2(const Vector2D& world_pos, const Grid& u, const Grid& v,
+    Vector2D RK2(const Vector2D& grid_pos, const Grid& u, const Grid& v,
                  const f32 dt) const;
 
     /// @brief Width of the grid in world space. Equal to nx() * cellSize().
@@ -97,10 +103,6 @@ private:
 
     /// @brief Height of the grid in world space. Equal to ny() * cellSize().
     f32 height() const;
-
-    /// @brief Factor to multiple mCellSize for clamping worldspace position to
-    /// cell coordinates.
-    const f32 cBoundsFactor = 1.001f;
 
     /// @brief Number of columns in the grid.
     i32 mNx;

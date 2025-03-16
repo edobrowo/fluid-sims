@@ -4,8 +4,6 @@
 
 #include "math/common.hpp"
 
-namespace {}
-
 Grid::Grid(const i32 rows, const i32 cols, const Vector2D& cell_center,
            const f32 cell_size)
     : mNx(cols),
@@ -14,7 +12,7 @@ Grid::Grid(const i32 rows, const i32 cols, const Vector2D& cell_center,
       mCellSize(cell_size) {
     assertm(mNy > 0, "number of rows must be positive");
     assertm(mNx > 0, "number of cols must be positive");
-    assertm(mCellSize != 0.0f, "cell size must be nonzero");
+    assertm(mCellSize > 0.0f, "cell size must be positive");
 
     mData = new f32[mNx * mNy];
 }
@@ -83,42 +81,21 @@ f32* Grid::data() {
     return mData;
 }
 
-f32 Grid::interp(const Vector2D& grid_pos) const {
-    // See page 29 for averaging example.
-    const Vector2D upper_bound =
-        Vector2D(static_cast<f32>(mNx) - cBoundsFactor,
-                 static_cast<f32>(mNy) - cBoundsFactor);
-    const Vector2D pos =
-        (grid_pos - mCellCenter).clamped(Vector2D(0.0f), upper_bound);
+Vector2D Grid::toGridSpace(const Vector2D& world_pos) const {
+    return world_pos / mCellSize - mCellCenter;
+}
 
-    const Vector2i cell00 = Vector2i(pos[0], pos[1]);
-    const Vector2i cell01 = cell00 + Vector2i(0, 1);
-    const Vector2i cell10 = cell00 + Vector2i(1, 0);
-    const Vector2i cell11 = cell00 + Vector2i(1, 1);
-
-    const f32 x0 = static_cast<f32>(cell00[0]);
-    const f32 y0 = static_cast<f32>(cell00[1]);
-
-    const f32 x = pos[0] - x0;
-    const f32 y = pos[1] - y0;
-
-    const f32 v00 = (*this)(cell00[0], cell00[1]);
-    const f32 v01 = (*this)(cell01[0], cell01[1]);
-    const f32 v10 = (*this)(cell10[0], cell10[1]);
-    const f32 v11 = (*this)(cell11[0], cell11[1]);
-
-    return (1 - x) * (1 - y) * v00 + (1 - x) * y * v01 + x * (1 - y) * v10 +
-           x * y * v11;
+Vector2D Grid::toWorldSpace(const Vector2D& grid_pos) const {
+    return (grid_pos + mCellCenter) * mCellSize;
 }
 
 Grid Grid::advect(const Grid& u, const Grid& v, const f32 dt) {
-    // Page 32.
     Grid next(mNy, mNx, mCellCenter, mCellSize);
 
+    // Page 32.
     for (i32 iy = 0; iy < mNy; ++iy) {
         for (i32 ix = 0; ix < mNx; ++ix) {
-            // Construct the gridspace position corresponding at the center of
-            // the current cell.
+            // Construct the gridspace position at the current cell center.
             const Vector2D grid_pos = Vector2D(ix, iy) + mCellCenter;
 
             // Semi-Lagrangian backwards integration in time over (u, v).
@@ -132,31 +109,22 @@ Grid Grid::advect(const Grid& u, const Grid& v, const f32 dt) {
     return next;
 }
 
-Vector2D Grid::toGridSpace(const Vector2D& world_pos) const {
-    const Vector2D upper_bound = Vector2D(width() - cBoundsFactor * mCellSize,
-                                          height() - cBoundsFactor * mCellSize);
-    return (world_pos / mCellSize - mCellCenter)
-        .clamped(Vector2D(0.0f), upper_bound);
-}
-
-Vector2D Grid::toWorldSpace(const Vector2D& grid_pos) const {
-    return (grid_pos + mCellCenter) * mCellSize;
-}
-
 void Grid::fill(const f32 value) {
     std::fill_n(mData, mNy * mNx, value);
 }
 
 void Grid::add(const Vector2D& world_pos, const Vector2D& size,
                const f32 value) {
-    const Vector2D& region_lower = world_pos / mCellSize - mCellCenter;
-    const Vector2D& region_upper = (world_pos + size) / mCellSize - mCellCenter;
+    const Vector2D& start = toGridSpace(world_pos);
+    const Vector2D& end = toGridSpace(world_pos + size);
 
-    const Vector2i low = Vector2i(region_lower[0], region_lower[1]);
-    const Vector2i upp = Vector2i(region_upper[0], region_upper[1]);
+    const i32 iy_start = std::fmax(0.0f, static_cast<i32>(start[1]));
+    const i32 iy_end = std::fmin(mNy, static_cast<i32>(end[1]));
+    const i32 ix_start = std::fmax(0.0f, static_cast<i32>(start[0]));
+    const i32 ix_end = std::fmin(mNx, static_cast<i32>(end[0]));
 
-    for (i32 iy = low[1]; iy < upp[1]; ++iy) {
-        for (i32 ix = low[0]; ix < upp[0]; ++ix) {
+    for (i32 iy = iy_start; iy < iy_end; ++iy) {
+        for (i32 ix = ix_start; ix < ix_end; ++ix) {
             if (std::fabs((*this)(ix, iy)) < std::fabs(value))
                 (*this)(ix, iy) = value;
         }
@@ -169,6 +137,32 @@ f32 Grid::max() const {
 
 f32 Grid::min() const {
     return *std::min_element(mData, mData + cellCount());
+}
+
+f32 Grid::interp(const Vector2D& grid_pos) const {
+    const Vector2D pos = clampToGrid(grid_pos);
+
+    const i32 ix = static_cast<i32>(std::floor(pos[0]));
+    const i32 iy = static_cast<i32>(std::floor(pos[1]));
+
+    const f32 x = pos[0] - static_cast<f32>(ix);
+    const f32 y = pos[1] - static_cast<f32>(iy);
+
+    const f32 v00 = (*this)(ix, iy);
+    const f32 v01 = (*this)(ix, iy + 1);
+    const f32 v10 = (*this)(ix + 1, iy);
+    const f32 v11 = (*this)(ix + 1, iy + 1);
+
+    // See page 29 for averaging example.
+    return (1 - x) * (1 - y) * v00 + (1 - x) * y * v01 + x * (1 - y) * v10 +
+           x * y * v11;
+}
+
+Vector2D Grid::clampToGrid(const Vector2D& grid_pos) const {
+    const Vector2D upper_bound =
+        Vector2D(static_cast<f32>(mNx) - cGridClampOffset,
+                 static_cast<f32>(mNy) - cGridClampOffset);
+    return (grid_pos - mCellCenter).clamped(Vector2D(0.0f), upper_bound);
 }
 
 Vector2D Grid::backtrace(const Vector2D& grid_pos, const Grid& u, const Grid& v,
