@@ -23,14 +23,20 @@ public:
                      const Vector2D& u);
 
 private:
+    const Size cNumberOfGSIterations = 600;
+
     /// @brief Calculates and applies the pressure necessary to
-    ///  make mU divergence free and enforces solid wall boundary
+    ///  make u divergence free and enforces solid wall boundary
     ///  conditions.
     /// @return Updated divergence-free velocity field.
     void project();
 
-    /// @brief Constructs the divergence vector (mDiv).
+    /// @brief Constructs the divergence vector (div).
     void buildDivergences();
+
+    /// @brief Solves the Poisson equation for pressure projection using
+    /// Gauss-Seidel iteration.
+    void solvePressureEquation();
 
     /// @brief Enforces the velocity field to be divergence-free.
     void makeDivergenceFree();

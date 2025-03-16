@@ -4,6 +4,8 @@
 
 #include "math/common.hpp"
 
+namespace {}
+
 Grid::Grid(const i32 rows, const i32 cols, const Vector2D& cell_center,
            const f32 cell_size)
     : mNx(cols),
@@ -13,17 +15,7 @@ Grid::Grid(const i32 rows, const i32 cols, const Vector2D& cell_center,
     assertm(mNy > 0, "number of rows must be positive");
     assertm(mNx > 0, "number of cols must be positive");
     assertm(mCellSize != 0.0f, "cell size must be nonzero");
-    mData = new f32[mNx * mNy];
-}
 
-Grid::Grid(const i32 rows, const i32 cols, const f32 cell_size)
-    : mNx(cols),
-      mNy(rows),
-      mCellCenter(Vector2D(0.5f, 0.5f)),
-      mCellSize(cell_size) {
-    assertm(mNy > 0, "number of rows must be positive");
-    assertm(mNx > 0, "number of cols must be positive");
-    assertm(mCellSize != 0.0f, "cell size must be nonzero");
     mData = new f32[mNx * mNy];
 }
 
@@ -49,6 +41,24 @@ Grid::~Grid() {
     delete[] mData;
 }
 
+f32 Grid::operator()(const i32 ix, const i32 iy) const {
+    assertm(ix >= 0, "x out of bounds");
+    assertm(ix < mNx, "x out of bounds");
+    assertm(iy >= 0, "y out of bounds");
+    assertm(iy < mNy, "y out of bounds");
+
+    return mData[iy * mNx + ix];
+}
+
+f32& Grid::operator()(const i32 ix, const i32 iy) {
+    assertm(ix >= 0, "x out of bounds");
+    assertm(ix < mNx, "x out of bounds");
+    assertm(iy >= 0, "y out of bounds");
+    assertm(iy < mNy, "y out of bounds");
+
+    return mData[iy * mNx + ix];
+}
+
 i32 Grid::nx() const {
     return mNx;
 }
@@ -57,7 +67,7 @@ i32 Grid::ny() const {
     return mNy;
 }
 
-i32 Grid::size() const {
+i32 Grid::cellCount() const {
     return mNx * mNy;
 }
 
@@ -69,35 +79,15 @@ Vector2D Grid::cellCenter() const {
     return mCellCenter;
 }
 
-f32 Grid::width() const {
-    return static_cast<float>(mNx) * mCellSize;
-}
-
-f32 Grid::height() const {
-    return static_cast<float>(mNy) * mCellSize;
-}
-
-f32 Grid::operator()(const i32 ix, const i32 iy) const {
-    assertm(ix >= 0, "x out of bounds");
-    assertm(ix < mNx, "x out of bounds");
-    assertm(iy >= 0, "y out of bounds");
-    assertm(iy < mNy, "y out of bounds");
-    return mData[iy * mNx + ix];
-}
-
-f32& Grid::operator()(const i32 ix, const i32 iy) {
-    assertm(ix >= 0, "x out of bounds");
-    assertm(ix < mNx, "x out of bounds");
-    assertm(iy >= 0, "y out of bounds");
-    assertm(iy < mNy, "y out of bounds");
-    return mData[iy * mNx + ix];
+f32* Grid::data() {
+    return mData;
 }
 
 f32 Grid::interp(const Vector2D& grid_pos) const {
-    // Simple bilinear interpolation. See page 29 for averaging example.
+    // See page 29 for averaging example.
     const Vector2D upper_bound =
-        Vector2D(static_cast<float>(mNx) - cBoundsFactor,
-                 static_cast<float>(mNy) - cBoundsFactor);
+        Vector2D(static_cast<f32>(mNx) - cBoundsFactor,
+                 static_cast<f32>(mNy) - cBoundsFactor);
     const Vector2D pos =
         (grid_pos - mCellCenter).clamped(Vector2D(0.0f), upper_bound);
 
@@ -142,30 +132,6 @@ Grid Grid::advect(const Grid& u, const Grid& v, const f32 dt) {
     return next;
 }
 
-Vector2D Grid::backtrace(const Vector2D& grid_pos, const Grid& u, const Grid& v,
-                         const f32 dt) const {
-    // Integrate back in time with RK2.
-    return euler(grid_pos, u, v, dt);
-}
-
-Vector2D Grid::euler(const Vector2D& grid_pos, const Grid& u, const Grid& v,
-                     const f32 dt) const {
-    const Vector2D v1 =
-        Vector2D(u.interp(grid_pos), v.interp(grid_pos)) / mCellSize;
-    return grid_pos - dt * v1;
-}
-
-Vector2D Grid::RK2(const Vector2D& grid_pos, const Grid& u, const Grid& v,
-                   const f32 dt) const {
-    const Vector2D v1 =
-        Vector2D(u.interp(grid_pos), v.interp(grid_pos)) / mCellSize;
-    const Vector2D pos_mid = grid_pos - 0.5f * dt * v1;
-    const Vector2D v2 =
-        Vector2D(u.interp(pos_mid), v.interp(pos_mid)) / mCellSize;
-    const Vector2D pos_orig = grid_pos - dt * v2;
-    return pos_orig;
-}
-
 Vector2D Grid::toGridSpace(const Vector2D& world_pos) const {
     const Vector2D upper_bound = Vector2D(width() - cBoundsFactor * mCellSize,
                                           height() - cBoundsFactor * mCellSize);
@@ -175,14 +141,6 @@ Vector2D Grid::toGridSpace(const Vector2D& world_pos) const {
 
 Vector2D Grid::toWorldSpace(const Vector2D& grid_pos) const {
     return (grid_pos + mCellCenter) * mCellSize;
-}
-
-f32 Grid::max() const {
-    return *std::max_element(mData, mData + size());
-}
-
-f32 Grid::min() const {
-    return *std::min_element(mData, mData + size());
 }
 
 void Grid::fill(const f32 value) {
@@ -205,6 +163,41 @@ void Grid::add(const Vector2D& world_pos, const Vector2D& size,
     }
 }
 
-f32* Grid::data() {
-    return mData;
+f32 Grid::max() const {
+    return *std::max_element(mData, mData + cellCount());
+}
+
+f32 Grid::min() const {
+    return *std::min_element(mData, mData + cellCount());
+}
+
+Vector2D Grid::backtrace(const Vector2D& grid_pos, const Grid& u, const Grid& v,
+                         const f32 dt) const {
+    return euler(grid_pos, u, v, dt);
+}
+
+Vector2D Grid::euler(const Vector2D& grid_pos, const Grid& u, const Grid& v,
+                     const f32 dt) const {
+    const Vector2D v1 =
+        Vector2D(u.interp(grid_pos), v.interp(grid_pos)) / mCellSize;
+    return grid_pos - dt * v1;
+}
+
+Vector2D Grid::RK2(const Vector2D& grid_pos, const Grid& u, const Grid& v,
+                   const f32 dt) const {
+    const Vector2D v1 =
+        Vector2D(u.interp(grid_pos), v.interp(grid_pos)) / mCellSize;
+    const Vector2D pos_mid = grid_pos - 0.5f * dt * v1;
+    const Vector2D v2 =
+        Vector2D(u.interp(pos_mid), v.interp(pos_mid)) / mCellSize;
+    const Vector2D pos_orig = grid_pos - dt * v2;
+    return pos_orig;
+}
+
+f32 Grid::width() const {
+    return static_cast<f32>(mNx) * mCellSize;
+}
+
+f32 Grid::height() const {
+    return static_cast<f32>(mNy) * mCellSize;
 }
