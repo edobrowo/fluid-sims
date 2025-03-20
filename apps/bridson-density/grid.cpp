@@ -164,7 +164,7 @@ f32 Grid::min() const {
 }
 
 f32 Grid::interp(const Vector2D& grid_pos) const {
-    return lerp(grid_pos);
+    return cerp(grid_pos);
 }
 
 Vector2D Grid::clampToGrid(const Vector2D& grid_pos) const {

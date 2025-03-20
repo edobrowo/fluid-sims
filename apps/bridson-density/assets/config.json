@@ -1,5 +1,5 @@
 {
-    "save_frames": true,
+    "save_frames": false,
     "grid_rows": 128,
     "grid_cols": 128,
     "cell_size": 0.0078125,

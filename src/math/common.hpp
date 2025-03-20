@@ -60,7 +60,7 @@ constexpr inline T cerp(T t, T a, T b, T c, T d) {
     return (     -0.5 * t +       t2 - 0.5 * t3) * a +
            (1.0           - 2.5 * t2 + 1.5 * t3) * b +
            (      0.5 * t + 2.0 * t2 - 1.5 * t3) * c +
-           (                0.5 * t2 + 0.5 * t3) * d;
+           (              - 0.5 * t2 + 0.5 * t3) * d;
     // clang-format on
 }
 
