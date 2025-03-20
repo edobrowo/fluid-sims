@@ -28,8 +28,10 @@ private:
     /// @brief Calculates and applies the pressure necessary to
     ///  make u divergence free and enforces solid wall boundary
     ///  conditions.
-    /// @return Updated divergence-free velocity field.
     void project();
+
+    /// @brief Advects density and velocity through the current velocity grid.
+    void advect();
 
     /// @brief Constructs the divergence vector (div).
     void buildDivergences();
