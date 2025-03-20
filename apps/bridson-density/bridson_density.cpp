@@ -1,5 +1,11 @@
 #include "bridson_density.hpp"
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb_image_write.h>
+
+#include <iomanip>
+#include <sstream>
+
 #include "quad.hpp"
 #include "util/files.hpp"
 
@@ -10,9 +16,13 @@ void BridsonDensity::init() {
     glfwSetInputMode(mWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
     files::Json config = files::read_to_json(asset("config.json").c_str());
+
+    mConfig.saveFrames = config["save_frames"];
+
     mConfig.rows = config["grid_rows"];
     mConfig.cols = config["grid_cols"];
     mConfig.cellSize = 1.0f / mConfig.rows;
+
     mConfig.timestep = config["timestep"];
     mConfig.density = config["density"];
 
@@ -79,6 +89,12 @@ void BridsonDensity::draw() {
     mTexture.bind(0);
 
     mQuadMesh.render();
+
+    if (mConfig.saveFrames) {
+        saveCurrentFrame();
+    }
+
+    ++mFrameCounter;
 }
 
 void BridsonDensity::onMouseMove(const Vector2D pos) {
@@ -100,4 +116,26 @@ void BridsonDensity::onKeyPress(int key, int action, int mods) {
 
 void BridsonDensity::onFramebufferResize(const u32 width, const u32 height) {
     glViewport(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height));
+}
+
+void BridsonDensity::saveCurrentFrame() const {
+    if (mTexData.empty()) {
+        eprintln("mTextData empty");
+        return;
+    }
+
+    std::ostringstream filenameStream;
+    filenameStream << "Frame_" << std::setw(5) << std::setfill('0')
+                   << mFrameCounter << ".png";
+    const std::string filename = filenameStream.str();
+    const std::string path = root() + "/frames/" + filename;
+
+    const int error =
+        stbi_write_png(path.c_str(), static_cast<int>(mConfig.cols),
+                       static_cast<int>(mConfig.rows), 3, mTexData.data(),
+                       static_cast<int>(mConfig.cols * 3));
+
+    if (!error) {
+        eprintln("Failed to save the current frame");
+    }
 }

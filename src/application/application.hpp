@@ -63,6 +63,9 @@ protected:
     /// @brief Quits the application.
     void quit() const;
 
+    /// @brief Retrieves the project root path.
+    std::string root() const;
+
     /// @brief Retrieves the full path to the specified asset.
     std::string asset(const char* path) const;
 

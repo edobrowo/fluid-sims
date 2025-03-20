@@ -3,6 +3,8 @@
 #include "util/common.hpp"
 
 struct Config {
+    bool saveFrames;
+
     Size rows;
     Size cols;
     f32 cellSize;

@@ -27,6 +27,8 @@ public:
                                      const u32 height) override;
 
 private:
+    void saveCurrentFrame() const;
+
     gl::ShaderProgram mProgram;
     gl::Mesh mQuadMesh;
 
@@ -39,4 +41,6 @@ private:
 
     std::unique_ptr<Solver> mSolver;
     Config mConfig;
+
+    u32 mFrameCounter;
 };

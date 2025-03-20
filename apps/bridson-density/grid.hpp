@@ -72,9 +72,9 @@ public:
 
 private:
     /// @brief Finds the grid value at the given gridspace position using
-    /// bilinear interpolation. Performs extrapolation by clamping; that is, by
-    /// finding the closest point on the boundary of the grid and interpolating
-    /// with the corresponding cell.
+    /// bipolynomial interpolation. Performs extrapolation by clamping. That is,
+    /// by finding the closest point on the boundary of the grid and
+    /// interpolating with the corresponding cell.
     /// @param pos Worldspace position.
     /// @return Computed value at the worldspace position.
     f32 interp(const Vector2D& grid_pos) const;
@@ -97,6 +97,16 @@ private:
     /// @brief Integrates back in time with 2nd order Runge-Kutta.
     Vector2D RK2(const Vector2D& grid_pos, const Grid& u, const Grid& v,
                  const f32 dt) const;
+
+    /// @brief Integrates back in time with 3nd order Runge-Kutta.
+    Vector2D RK3(const Vector2D& grid_pos, const Grid& u, const Grid& v,
+                 const f32 dt) const;
+
+    /// @brief Linearly interpolates the value at the specified position.
+    f32 lerp(const Vector2D& grid_pos) const;
+
+    /// @brief Cubicly interpolates the value at the specified position.
+    f32 cerp(const Vector2D& grid_pos) const;
 
     /// @brief Width of the grid in world space. Equal to nx() * cellSize().
     f32 width() const;

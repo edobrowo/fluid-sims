@@ -51,6 +51,19 @@ constexpr inline T lerp(T t, T a, T b) {
     return t * a + (1.0 - t) * b;
 }
 
+template <std::floating_point T>
+constexpr inline T cerp(T t, T a, T b, T c, T d) {
+    const T t2 = t * t;
+    const T t3 = t2 * t;
+
+    // clang-format off
+    return (     -0.5 * t +       t2 - 0.5 * t3) * a +
+           (1.0           - 2.5 * t2 + 1.5 * t3) * b +
+           (      0.5 * t + 2.0 * t2 - 1.5 * t3) * c +
+           (                0.5 * t2 + 0.5 * t3) * d;
+    // clang-format on
+}
+
 template <Numeric T>
 constexpr inline T scale(T value, T min, T max) {
     assertm(max - min != 0, "max - min is 0");

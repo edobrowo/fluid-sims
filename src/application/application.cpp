@@ -71,6 +71,10 @@ void Application::quit() const {
     glfwSetWindowShouldClose(mWindow, true);
 }
 
+std::string Application::root() const {
+    return mRootPath;
+}
+
 std::string Application::asset(const char* path) const {
     return mRootPath + "/assets/" + path;
 }

@@ -4,6 +4,17 @@
 
 #include "math/common.hpp"
 
+namespace {
+
+f32 cerp_clamped(const f32 t, const f32 a, const f32 b, const f32 c,
+                 const f32 d) {
+    const f32 min_coeff = std::min(a, std::min(b, std::min(c, d)));
+    const f32 max_coeff = std::max(a, std::max(b, std::max(c, d)));
+    return math::clamp(math::cerp(t, a, b, c, d), min_coeff, max_coeff);
+}
+
+}
+
 Grid::Grid(const i32 rows, const i32 cols, const Vector2D& cell_center,
            const f32 cell_size)
     : mNx(cols),
@@ -115,18 +126,31 @@ void Grid::fill(const f32 value) {
 
 void Grid::add(const Vector2D& world_pos, const Vector2D& size,
                const f32 value) {
-    const Vector2D& start = toGridSpace(world_pos);
-    const Vector2D& end = toGridSpace(world_pos + size);
+    const Vector2D& grid_pos0 = toGridSpace(world_pos);
+    const Vector2D& grid_pos1 = toGridSpace(world_pos + size);
 
-    const i32 iy_start = std::fmax(0.0f, static_cast<i32>(start[1]));
-    const i32 iy_end = std::fmin(mNy, static_cast<i32>(end[1]));
-    const i32 ix_start = std::fmax(0.0f, static_cast<i32>(start[0]));
-    const i32 ix_end = std::fmin(mNx, static_cast<i32>(end[0]));
+    const i32 ix0 = std::fmax(0.0f, static_cast<i32>(grid_pos0[0]));
+    const i32 iy0 = std::fmax(0.0f, static_cast<i32>(grid_pos0[1]));
 
-    for (i32 iy = iy_start; iy < iy_end; ++iy) {
-        for (i32 ix = ix_start; ix < ix_end; ++ix) {
-            if (std::fabs((*this)(ix, iy)) < std::fabs(value))
-                (*this)(ix, iy) = value;
+    const i32 ix1 = std::fmin(mNx, static_cast<i32>(grid_pos1[0]));
+    const i32 iy1 = std::fmin(mNy, static_cast<i32>(grid_pos1[1]));
+
+    const Vector2D g0(ix0, iy0);
+    const Vector2D g1(ix1, iy1);
+
+    for (i32 iy = iy0; iy < iy1; ++iy) {
+        for (i32 ix = ix0; ix < ix1; ++ix) {
+            const Vector2D curr(ix, iy);
+
+            const Vector2D vn =
+                ((2.0f * (curr + Vector2D(0.5f)) * mCellSize - (g0 + g1)) /
+                 (g1 - g0));
+            const f32 l = std::min(std::fabs(vn.length()), 1.0f);
+
+            const f32 v = math::hermite(l) * value;
+
+            if (std::fabs((*this)(ix, iy)) < std::fabs(v))
+                (*this)(ix, iy) = v;
         }
     }
 }
@@ -140,6 +164,57 @@ f32 Grid::min() const {
 }
 
 f32 Grid::interp(const Vector2D& grid_pos) const {
+    return lerp(grid_pos);
+}
+
+Vector2D Grid::clampToGrid(const Vector2D& grid_pos) const {
+    const Vector2D upper_bound =
+        Vector2D(static_cast<f32>(mNx) - cGridClampOffset,
+                 static_cast<f32>(mNy) - cGridClampOffset);
+    return (grid_pos - mCellCenter).clamped(Vector2D(0.0f), upper_bound);
+}
+
+Vector2D Grid::backtrace(const Vector2D& grid_pos, const Grid& u, const Grid& v,
+                         const f32 dt) const {
+    return RK3(grid_pos, u, v, dt);
+}
+
+Vector2D Grid::euler(const Vector2D& grid_pos, const Grid& u, const Grid& v,
+                     const f32 dt) const {
+    const Vector2D v1 =
+        Vector2D(u.interp(grid_pos), v.interp(grid_pos)) / mCellSize;
+    return grid_pos - dt * v1;
+}
+
+Vector2D Grid::RK2(const Vector2D& grid_pos, const Grid& u, const Grid& v,
+                   const f32 dt) const {
+    const Vector2D v1 =
+        Vector2D(u.interp(grid_pos), v.interp(grid_pos)) / mCellSize;
+    const Vector2D pos1 = grid_pos - 0.5f * dt * v1;
+
+    const Vector2D v2 = Vector2D(u.interp(pos1), v.interp(pos1)) / mCellSize;
+    const Vector2D pos2 = grid_pos - dt * v2;
+
+    return pos2;
+}
+
+Vector2D Grid::RK3(const Vector2D& grid_pos, const Grid& u, const Grid& v,
+                   const f32 dt) const {
+    const Vector2D v1 =
+        Vector2D(u.interp(grid_pos), v.interp(grid_pos)) / mCellSize;
+    const Vector2D pos1 = grid_pos - 0.5f * dt * v1;
+
+    const Vector2D v2 = Vector2D(u.interp(pos1), v.interp(pos1)) / mCellSize;
+    const Vector2D pos2 = grid_pos - 0.75f * dt * v2;
+
+    const Vector2D v3 = Vector2D(u.interp(pos2), v.interp(pos2)) / mCellSize;
+    const Vector2D pos3 = grid_pos - dt * (2.0f / 9.0f * v1 + 3.0f / 9.0f * v2 +
+                                           4.0f / 9.0f * v3);
+
+    return pos3;
+}
+
+f32 Grid::lerp(const Vector2D& grid_pos) const {
     const Vector2D pos = clampToGrid(grid_pos);
 
     const i32 ix = static_cast<i32>(std::floor(pos[0]));
@@ -154,38 +229,38 @@ f32 Grid::interp(const Vector2D& grid_pos) const {
     const f32 v11 = (*this)(ix + 1, iy + 1);
 
     // See page 29 for averaging example.
-    return (1 - x) * (1 - y) * v00 + (1 - x) * y * v01 + x * (1 - y) * v10 +
-           x * y * v11;
+    return math::lerp(y, math::lerp(x, v11, v01), math::lerp(x, v10, v00));
 }
 
-Vector2D Grid::clampToGrid(const Vector2D& grid_pos) const {
-    const Vector2D upper_bound =
-        Vector2D(static_cast<f32>(mNx) - cGridClampOffset,
-                 static_cast<f32>(mNy) - cGridClampOffset);
-    return (grid_pos - mCellCenter).clamped(Vector2D(0.0f), upper_bound);
-}
+f32 Grid::cerp(const Vector2D& grid_pos) const {
+    const Vector2D pos = clampToGrid(grid_pos);
 
-Vector2D Grid::backtrace(const Vector2D& grid_pos, const Grid& u, const Grid& v,
-                         const f32 dt) const {
-    return euler(grid_pos, u, v, dt);
-}
+    const i32 ix = static_cast<i32>(std::floor(pos[0]));
+    const i32 iy = static_cast<i32>(std::floor(pos[1]));
 
-Vector2D Grid::euler(const Vector2D& grid_pos, const Grid& u, const Grid& v,
-                     const f32 dt) const {
-    const Vector2D v1 =
-        Vector2D(u.interp(grid_pos), v.interp(grid_pos)) / mCellSize;
-    return grid_pos - dt * v1;
-}
+    const f32 x = pos[0] - static_cast<f32>(ix);
+    const f32 y = pos[1] - static_cast<f32>(iy);
 
-Vector2D Grid::RK2(const Vector2D& grid_pos, const Grid& u, const Grid& v,
-                   const f32 dt) const {
-    const Vector2D v1 =
-        Vector2D(u.interp(grid_pos), v.interp(grid_pos)) / mCellSize;
-    const Vector2D pos_mid = grid_pos - 0.5f * dt * v1;
-    const Vector2D v2 =
-        Vector2D(u.interp(pos_mid), v.interp(pos_mid)) / mCellSize;
-    const Vector2D pos_orig = grid_pos - dt * v2;
-    return pos_orig;
+    const i32 x0 = std::max(ix - 1, 0);
+    const i32 x1 = ix;
+    const i32 x2 = ix + 1;
+    const i32 x3 = std::min(ix + 2, mNx - 1);
+
+    const i32 y0 = std::max(iy - 1, 0);
+    const i32 y1 = iy;
+    const i32 y2 = iy + 1;
+    const i32 y3 = std::min(iy + 2, mNy - 1);
+
+    const f32 q0 = cerp_clamped(x, (*this)(x0, y0), (*this)(x1, y0),
+                                (*this)(x2, y0), (*this)(x3, y0));
+    const f32 q1 = cerp_clamped(x, (*this)(x0, y1), (*this)(x1, y1),
+                                (*this)(x2, y1), (*this)(x3, y1));
+    const f32 q2 = cerp_clamped(x, (*this)(x0, y2), (*this)(x1, y2),
+                                (*this)(x2, y2), (*this)(x3, y2));
+    const f32 q3 = cerp_clamped(x, (*this)(x0, y3), (*this)(x1, y3),
+                                (*this)(x2, y3), (*this)(x3, y3));
+
+    return cerp_clamped(y, q0, q1, q2, q3);
 }
 
 f32 Grid::width() const {
