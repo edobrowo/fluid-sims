@@ -3,7 +3,10 @@
 Solver::Solver(const Config& config)
     : mMac(config.rows, config.cols, config.cellSize),
       mTimestep(config.timestep),
-      mDensity(config.density) {
+      mDensity(config.density),
+      mAdvectDensity(mMac.d, mMac.u, mMac.v),
+      mAdvectU(mMac.u, mMac.u, mMac.v),
+      mAdvectV(mMac.v, mMac.u, mMac.v) {
 }
 
 f32 Solver::color(const Vector2i& cell) const {
@@ -36,13 +39,14 @@ void Solver::project() {
 }
 
 void Solver::advect() {
-    const Grid density = mMac.d.advect(mMac.u, mMac.v, mTimestep);
-    const Grid u = mMac.u.advect(mMac.u, mMac.v, mTimestep);
-    const Grid v = mMac.v.advect(mMac.u, mMac.v, mTimestep);
+    mAdvectDensity(mTimestep);
+    mAdvectDensity.swap();
 
-    mMac.d = std::move(density);
-    mMac.u = std::move(u);
-    mMac.v = std::move(v);
+    mAdvectU(mTimestep);
+    mAdvectV(mTimestep);
+
+    mAdvectU.swap();
+    mAdvectV.swap();
 }
 
 void Solver::buildDivergences() {

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "advection.hpp"
 #include "config.hpp"
 #include "grid.hpp"
 #include "mac_grid.hpp"
@@ -51,4 +52,13 @@ private:
 
     /// @brief Fluid density.
     f32 mDensity;
+
+    /// @brief Advection over density.
+    Advection mAdvectDensity;
+
+    /// @brief Advection over U.
+    Advection mAdvectU;
+
+    /// @brief Advection over V.
+    Advection mAdvectV;
 };

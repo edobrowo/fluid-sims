@@ -100,24 +100,8 @@ Vector2D Grid::toWorldSpace(const Vector2D& grid_pos) const {
     return (grid_pos + mCellCenter) * mCellSize;
 }
 
-Grid Grid::advect(const Grid& u, const Grid& v, const f32 dt) {
-    Grid next(mNy, mNx, mCellCenter, mCellSize);
-
-    // Page 32.
-    for (i32 iy = 0; iy < mNy; ++iy) {
-        for (i32 ix = 0; ix < mNx; ++ix) {
-            // Construct the gridspace position at the current cell center.
-            const Vector2D grid_pos = Vector2D(ix, iy) + mCellCenter;
-
-            // Semi-Lagrangian backwards integration in time over (u, v).
-            const Vector2D initial_pos = backtrace(grid_pos, u, v, dt);
-
-            // Interpolate from from the grid and set the new value.
-            next(ix, iy) = interp(initial_pos);
-        }
-    }
-
-    return next;
+f32 Grid::interp(const Vector2D& grid_pos) const {
+    return cerp(grid_pos);
 }
 
 void Grid::fill(const f32 value) {
@@ -163,55 +147,11 @@ f32 Grid::min() const {
     return *std::min_element(mData, mData + cellCount());
 }
 
-f32 Grid::interp(const Vector2D& grid_pos) const {
-    return cerp(grid_pos);
-}
-
 Vector2D Grid::clampToGrid(const Vector2D& grid_pos) const {
     const Vector2D upper_bound =
         Vector2D(static_cast<f32>(mNx) - cGridClampOffset,
                  static_cast<f32>(mNy) - cGridClampOffset);
     return (grid_pos - mCellCenter).clamped(Vector2D(0.0f), upper_bound);
-}
-
-Vector2D Grid::backtrace(const Vector2D& grid_pos, const Grid& u, const Grid& v,
-                         const f32 dt) const {
-    return RK3(grid_pos, u, v, dt);
-}
-
-Vector2D Grid::euler(const Vector2D& grid_pos, const Grid& u, const Grid& v,
-                     const f32 dt) const {
-    const Vector2D v1 =
-        Vector2D(u.interp(grid_pos), v.interp(grid_pos)) / mCellSize;
-    return grid_pos - dt * v1;
-}
-
-Vector2D Grid::RK2(const Vector2D& grid_pos, const Grid& u, const Grid& v,
-                   const f32 dt) const {
-    const Vector2D v1 =
-        Vector2D(u.interp(grid_pos), v.interp(grid_pos)) / mCellSize;
-    const Vector2D pos1 = grid_pos - 0.5f * dt * v1;
-
-    const Vector2D v2 = Vector2D(u.interp(pos1), v.interp(pos1)) / mCellSize;
-    const Vector2D pos2 = grid_pos - dt * v2;
-
-    return pos2;
-}
-
-Vector2D Grid::RK3(const Vector2D& grid_pos, const Grid& u, const Grid& v,
-                   const f32 dt) const {
-    const Vector2D v1 =
-        Vector2D(u.interp(grid_pos), v.interp(grid_pos)) / mCellSize;
-    const Vector2D pos1 = grid_pos - 0.5f * dt * v1;
-
-    const Vector2D v2 = Vector2D(u.interp(pos1), v.interp(pos1)) / mCellSize;
-    const Vector2D pos2 = grid_pos - 0.75f * dt * v2;
-
-    const Vector2D v3 = Vector2D(u.interp(pos2), v.interp(pos2)) / mCellSize;
-    const Vector2D pos3 = grid_pos - dt * (2.0f / 9.0f * v1 + 3.0f / 9.0f * v2 +
-                                           4.0f / 9.0f * v3);
-
-    return pos3;
 }
 
 f32 Grid::lerp(const Vector2D& grid_pos) const {
