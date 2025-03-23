@@ -4,7 +4,6 @@ MACGrid::MACGrid(const i32 rows, const i32 cols, const f32 cell_size)
     : u(rows, cols + 1, Vector2D(0.0f, 0.5f), cell_size),
       v(rows + 1, cols, Vector2D(0.5f, 0.0f), cell_size),
       p(rows, cols, Vector2D(0.5f, 0.5f), cell_size),
-      div(rows * cols),
       d(rows, cols, Vector2D(0.5f, 0.5f), cell_size),
       mNx(cols),
       mNy(rows),

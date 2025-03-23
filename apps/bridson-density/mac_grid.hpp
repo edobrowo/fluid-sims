@@ -18,9 +18,6 @@ public:
     /// @brief Pressure.
     Grid p;
 
-    /// @brief Velocity divergences.
-    std::vector<f32> div;
-
     /// @brief Density.
     Grid d;
 
