@@ -33,9 +33,7 @@ void Example::init() {
     mProgram.addStage(gl::ShaderKind::Fragment, fragment_shader.c_str());
 
     mProgram.build();
-
-    glUseProgram(mProgram.handle());
-    glep();
+    mProgram.use();
 
     // Vertex data and attributes
     mCubeMesh = geometry::Cube();

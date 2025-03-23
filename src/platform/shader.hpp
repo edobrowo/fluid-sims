@@ -30,6 +30,7 @@ public:
 
     void addStage(const ShaderKind stage_kind, const char* shader_source) const;
     void build() const;
+    void use() const;
 
     template <typename T>
     std::optional<T> uniform(const char* name) const;

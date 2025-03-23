@@ -3,13 +3,6 @@
 #include "quad.hpp"
 #include "util/files.hpp"
 
-// TODO: (GUI)
-// - force attenuation
-// - borders on or off
-// - fluid fidelity
-// - fluid color
-// - gravity
-
 StamRTFD::StamRTFD() : mTexData(N * N * 3) {
 }
 
@@ -34,9 +27,7 @@ void StamRTFD::init() {
     mProgram.addStage(gl::ShaderKind::Fragment, fragment_shader.c_str());
 
     mProgram.build();
-
-    glUseProgram(mProgram.handle());
-    glep();
+    mProgram.use();
 
     const Matrix4D projection =
         orthographic(0.0f, static_cast<f32>(mWindowWidth), 0.0f,

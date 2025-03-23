@@ -15,18 +15,10 @@ BridsonDensity::BridsonDensity() {
 void BridsonDensity::init() {
     glfwSetInputMode(mWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
-    files::Json config = files::read_to_json(asset("config.json").c_str());
+    // Load config.
+    mConfig = Config::loadFromJson(asset("config.json"));
 
-    mConfig.saveFrames = config["save_frames"];
-
-    mConfig.rows = config["grid_rows"];
-    mConfig.cols = config["grid_cols"];
-    mConfig.cellSize = 1.0f / mConfig.rows;
-
-    mConfig.timestep = config["timestep"];
-    mConfig.density = config["density"];
-
-    // Shader program
+    // Create shader program.
     std::string vertex_shader =
         files::read_to_string(asset("shaders/shader.vs").c_str());
     mProgram.addStage(gl::ShaderKind::Vertex, vertex_shader.c_str());
@@ -36,10 +28,9 @@ void BridsonDensity::init() {
     mProgram.addStage(gl::ShaderKind::Fragment, fragment_shader.c_str());
 
     mProgram.build();
+    mProgram.use();
 
-    glUseProgram(mProgram.handle());
-    glep();
-
+    // Set up 2D projection and textured quad.
     const Matrix4D projection =
         orthographic(0.0f, static_cast<f32>(mWindowWidth), 0.0f,
                      static_cast<f32>(mWindowHeight), -1.0f, 1.0f);
@@ -49,13 +40,12 @@ void BridsonDensity::init() {
         scale(Vector3D(mWindowWidth, mWindowHeight, 0.0f)) * translate(0.5f);
     mProgram.setUniform<Matrix4D>("model", model);
 
-    // Vertex data and attributes
     mQuadMesh = Quad();
 
-    // Texture
     mTexData.resize(mConfig.rows * mConfig.cols * 3);
     mProgram.setUniform<i32>("sampler", 0);
 
+    // Initialize the solver.
     mSolver = std::make_unique<Solver>(mConfig);
 }
 

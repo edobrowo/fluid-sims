@@ -52,3 +52,8 @@ void ShaderProgram::build() const {
     glLinkProgram(mHandle);
     glep();
 }
+
+void ShaderProgram::use() const {
+    glUseProgram(mHandle);
+    glep();
+}
