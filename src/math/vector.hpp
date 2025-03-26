@@ -56,7 +56,7 @@ using Vector3u = Vector<u32, 3>;
 using Vector4u = Vector<u32, 4>;
 
 template <Numeric T, u32 dim>
-Vector<T, dim>::Vector() : mComponents{} {
+Vector<T, dim>::Vector() : mComponents() {
 }
 
 template <Numeric T, u32 dim>

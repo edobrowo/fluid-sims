@@ -7,8 +7,8 @@ template <std::floating_point T, u32 p, u32 q>
 class Matrix {
 public:
     Matrix();
-    Matrix(const T value);
-    Matrix(const std::array<T, p * q>& elements);
+    explicit Matrix(const T value);
+    explicit Matrix(const std::array<T, p * q>& elements);
 
     ~Matrix() = default;
 
