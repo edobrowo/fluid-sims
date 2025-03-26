@@ -62,8 +62,10 @@ private:
     void matmul(std::vector<f32>& dst, const std::vector<f32>& b);
 
     /// @brief Computes a + b * s.
-    void scaledAdd(std::vector<f32>& dst, const std::vector<f32>& a,
-                   const std::vector<f32>& b, const f32 s);
+    void scaledAdd(std::vector<f32>& dst,
+                   const std::vector<f32>& a,
+                   const std::vector<f32>& b,
+                   const f32 s);
 
     /// @brief Returns maximum absolute value in vector a.
     f32 infinityNorm(const std::vector<f32>& a) const;

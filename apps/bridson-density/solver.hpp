@@ -21,7 +21,8 @@ public:
     void addDensity(const Vector2D& pos, const Vector2D& size, const f32 d);
 
     /// @brief Adds velocity to the specified region.
-    void addVelocity(const Vector2D& pos, const Vector2D& size,
+    void addVelocity(const Vector2D& pos,
+                     const Vector2D& size,
                      const Vector2D& u);
 
 private:

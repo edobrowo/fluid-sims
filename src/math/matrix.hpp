@@ -307,7 +307,8 @@ static Matrix<T, q, p> transpose(const Matrix<T, p, q>& value) {
 
 template <std::floating_point T, u32 p1, u32 q1, u32 p2, u32 q2>
 static Matrix<T, p2, q2> embed_zero(const Matrix<T, p1, q1>& value,
-                                    const Index x, const Index y) {
+                                    const Index x,
+                                    const Index y) {
     assertm(x < p1, "x not less than p1");
     assertm(p1 <= p2, "p1 not less than or equal to p2");
     assertm(y < q1, "y not less than q1");
@@ -320,7 +321,8 @@ static Matrix<T, p2, q2> embed_zero(const Matrix<T, p1, q1>& value,
 
 template <std::floating_point T, u32 dim1, u32 dim2>
 static Matrix<T, dim2, dim2> embed_ident(const Matrix<T, dim1, dim1>& value,
-                                         const Index x, const Index y) {
+                                         const Index x,
+                                         const Index y) {
     assertm(x < dim1, "x not less than dim1");
     assertm(y < dim1, "y not less than dim1");
     assertm(dim1 <= dim2, "dim1 not less than or equal to dim2");

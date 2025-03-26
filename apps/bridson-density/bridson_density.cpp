@@ -31,9 +31,12 @@ void BridsonDensity::init() {
     mProgram.use();
 
     // Set up 2D projection and textured quad.
-    const Matrix4D projection =
-        orthographic(0.0f, static_cast<f32>(mWindowWidth), 0.0f,
-                     static_cast<f32>(mWindowHeight), -1.0f, 1.0f);
+    const Matrix4D projection = orthographic(0.0f,
+                                             static_cast<f32>(mWindowWidth),
+                                             0.0f,
+                                             static_cast<f32>(mWindowHeight),
+                                             -1.0f,
+                                             1.0f);
     mProgram.setUniform<Matrix4D>("projection", projection);
 
     Matrix4D model =
@@ -120,10 +123,12 @@ void BridsonDensity::saveCurrentFrame() const {
     const std::string filename = filenameStream.str();
     const std::string path = root() + "/frames/" + filename;
 
-    const int error =
-        stbi_write_png(path.c_str(), static_cast<int>(mConfig.cols),
-                       static_cast<int>(mConfig.rows), 3, mTexData.data(),
-                       static_cast<int>(mConfig.cols * 3));
+    const int error = stbi_write_png(path.c_str(),
+                                     static_cast<int>(mConfig.cols),
+                                     static_cast<int>(mConfig.rows),
+                                     3,
+                                     mTexData.data(),
+                                     static_cast<int>(mConfig.cols * 3));
 
     if (!error) {
         eprintln("Failed to save the current frame");

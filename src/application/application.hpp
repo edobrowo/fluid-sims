@@ -25,9 +25,12 @@ public:
     /// @param fps Framerate.
     /// @param ...args Application arguments.
     template <ApplicationSubclass T, typename... Args>
-    static void launch(const u32 width, const u32 height,
-                       const std::string& title, f32 fps,
-                       const std::string& root_path, Args&&... args);
+    static void launch(const u32 width,
+                       const u32 height,
+                       const std::string& title,
+                       f32 fps,
+                       const std::string& root_path,
+                       Args&&... args);
 
 protected:
     Application();
@@ -96,8 +99,12 @@ private:
     /// @param title Window title.
     /// @param fps Framerate.
     template <ApplicationSubclass T, typename... Args>
-    static void run(const u32 width, const u32 height, const std::string& title,
-                    f32 fps, const std::string& root_path, Args&&... args);
+    static void run(const u32 width,
+                    const u32 height,
+                    const std::string& title,
+                    f32 fps,
+                    const std::string& root_path,
+                    Args&&... args);
 
     /// @brief Register all GLFW callbacks.
     void registerGlfwCallbacks();
@@ -105,14 +112,18 @@ private:
     static void errorCallback(int error, const char* description);
     static void cursorEnterWindowCallBack(GLFWwindow* window, int entered);
     static void mouseMoveCallBack(GLFWwindow* window, double xPos, double yPos);
-    static void mouseButtonPressCallBack(GLFWwindow* window, int button,
-                                         int actions, int mods);
-    static void mouseScrollCallBack(GLFWwindow* window, double xOffSet,
+    static void mouseButtonPressCallBack(GLFWwindow* window,
+                                         int button,
+                                         int actions,
+                                         int mods);
+    static void mouseScrollCallBack(GLFWwindow* window,
+                                    double xOffSet,
                                     double yOffSet);
-    static void keyPressCallBack(GLFWwindow* window, int key, int scancode,
-                                 int action, int mods);
+    static void keyPressCallBack(
+        GLFWwindow* window, int key, int scancode, int action, int mods);
     static void windowResizeCallBack(GLFWwindow* window, int width, int height);
-    static void framebufferResizeCallback(GLFWwindow* window, int width,
+    static void framebufferResizeCallback(GLFWwindow* window,
+                                          int width,
                                           int height);
 
     static std::shared_ptr<Application> mInstance;
@@ -121,19 +132,25 @@ private:
 };
 
 template <ApplicationSubclass T, typename... Args>
-void Application::launch(const u32 width, const u32 height,
-                         const std::string& title, f32 fps,
-                         const std::string& root_path, Args&&... args) {
+void Application::launch(const u32 width,
+                         const u32 height,
+                         const std::string& title,
+                         f32 fps,
+                         const std::string& root_path,
+                         Args&&... args) {
     if (mInstance == nullptr) {
-        Application::run<T, Args...>(width, height, title, fps, root_path,
-                                     args...);
+        Application::run<T, Args...>(
+            width, height, title, fps, root_path, args...);
     }
 }
 
 template <ApplicationSubclass T, typename... Args>
-void Application::run(const u32 width, const u32 height,
-                      const std::string& title, f32 fps,
-                      const std::string& root_path, Args&&... args) {
+void Application::run(const u32 width,
+                      const u32 height,
+                      const std::string& title,
+                      f32 fps,
+                      const std::string& root_path,
+                      Args&&... args) {
     if (!glfwInit()) {
         eprintln("failed to initialize GLFW");
         return;
@@ -204,8 +221,8 @@ void Application::run(const u32 width, const u32 height,
 
         int framebuffer_width;
         int framebuffer_height;
-        glfwGetFramebufferSize(mInstance->mWindow, &framebuffer_width,
-                               &framebuffer_height);
+        glfwGetFramebufferSize(
+            mInstance->mWindow, &framebuffer_width, &framebuffer_height);
         mInstance->mFramebufferWidth = static_cast<u32>(framebuffer_width);
         mInstance->mFramebufferHeight = static_cast<u32>(framebuffer_height);
 

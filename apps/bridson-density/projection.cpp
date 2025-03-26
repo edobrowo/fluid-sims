@@ -254,8 +254,10 @@ void Projection::matmul(std::vector<f32>& dst, const std::vector<f32>& b) {
     }
 }
 
-void Projection::scaledAdd(std::vector<f32>& dst, const std::vector<f32>& a,
-                           const std::vector<f32>& b, const f32 s) {
+void Projection::scaledAdd(std::vector<f32>& dst,
+                           const std::vector<f32>& a,
+                           const std::vector<f32>& b,
+                           const f32 s) {
     for (i32 i = 0; i < mMac.cellCount(); ++i) dst[i] = a[i] + s * b[i];
 }
 

@@ -15,10 +15,17 @@ Matrix4D rotateX(const f32 angle);
 Matrix4D rotateY(const f32 angle);
 Matrix4D rotateZ(const f32 angle);
 
-Matrix4D perspective_fovy(const f32 fovy, const f32 aspect, const f32 n,
+Matrix4D perspective_fovy(const f32 fovy,
+                          const f32 aspect,
+                          const f32 n,
                           const f32 f);
-Matrix4D orthographic(const f32 l, const f32 r, const f32 b, const f32 t,
-                      const f32 n, const f32 f);
+Matrix4D orthographic(const f32 l,
+                      const f32 r,
+                      const f32 b,
+                      const f32 t,
+                      const f32 n,
+                      const f32 f);
 
-Matrix4D lookat(const Vector3D& eye, const Vector3D& target,
+Matrix4D lookat(const Vector3D& eye,
+                const Vector3D& target,
                 const Vector3D& up);

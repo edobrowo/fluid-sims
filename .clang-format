@@ -16,3 +16,6 @@ DerivePointerAlignment: false
 PointerAlignment: Left
 AlignEscapedNewlines: Right
 IndentPPDirectives: None
+AllowShortEnumsOnASingleLine: false
+BinPackParameters: false
+BinPackArguments: false

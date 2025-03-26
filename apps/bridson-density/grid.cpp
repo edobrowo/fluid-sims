@@ -6,8 +6,8 @@
 
 namespace {
 
-f32 cerp_clamped(const f32 t, const f32 a, const f32 b, const f32 c,
-                 const f32 d) {
+f32 cerp_clamped(
+    const f32 t, const f32 a, const f32 b, const f32 c, const f32 d) {
     const f32 min_coeff = std::min(a, std::min(b, std::min(c, d)));
     const f32 max_coeff = std::max(a, std::max(b, std::max(c, d)));
     return math::clamp(math::cerp(t, a, b, c, d), min_coeff, max_coeff);
@@ -15,7 +15,9 @@ f32 cerp_clamped(const f32 t, const f32 a, const f32 b, const f32 c,
 
 }
 
-Grid::Grid(const i32 rows, const i32 cols, const Vector2D& cell_center,
+Grid::Grid(const i32 rows,
+           const i32 cols,
+           const Vector2D& cell_center,
            const f32 cell_size)
     : mNx(cols),
       mNy(rows),
@@ -108,7 +110,8 @@ void Grid::fill(const f32 value) {
     std::fill_n(mData, mNy * mNx, value);
 }
 
-void Grid::add(const Vector2D& world_pos, const Vector2D& size,
+void Grid::add(const Vector2D& world_pos,
+               const Vector2D& size,
                const f32 value) {
     const Vector2D& grid_pos0 = toGridSpace(world_pos);
     const Vector2D& grid_pos1 = toGridSpace(world_pos + size);
@@ -191,14 +194,14 @@ f32 Grid::cerp(const Vector2D& grid_pos) const {
     const i32 y2 = iy + 1;
     const i32 y3 = std::min(iy + 2, mNy - 1);
 
-    const f32 q0 = cerp_clamped(x, (*this)(x0, y0), (*this)(x1, y0),
-                                (*this)(x2, y0), (*this)(x3, y0));
-    const f32 q1 = cerp_clamped(x, (*this)(x0, y1), (*this)(x1, y1),
-                                (*this)(x2, y1), (*this)(x3, y1));
-    const f32 q2 = cerp_clamped(x, (*this)(x0, y2), (*this)(x1, y2),
-                                (*this)(x2, y2), (*this)(x3, y2));
-    const f32 q3 = cerp_clamped(x, (*this)(x0, y3), (*this)(x1, y3),
-                                (*this)(x2, y3), (*this)(x3, y3));
+    const f32 q0 = cerp_clamped(
+        x, (*this)(x0, y0), (*this)(x1, y0), (*this)(x2, y0), (*this)(x3, y0));
+    const f32 q1 = cerp_clamped(
+        x, (*this)(x0, y1), (*this)(x1, y1), (*this)(x2, y1), (*this)(x3, y1));
+    const f32 q2 = cerp_clamped(
+        x, (*this)(x0, y2), (*this)(x1, y2), (*this)(x2, y2), (*this)(x3, y2));
+    const f32 q3 = cerp_clamped(
+        x, (*this)(x0, y3), (*this)(x1, y3), (*this)(x2, y3), (*this)(x3, y3));
 
     return cerp_clamped(y, q0, q1, q2, q3);
 }

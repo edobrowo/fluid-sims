@@ -6,7 +6,9 @@
 
 class Grid {
 public:
-    Grid(const i32 nx, const i32 ny, const Vector2D& cell_center,
+    Grid(const i32 nx,
+         const i32 ny,
+         const Vector2D& cell_center,
          const f32 cell_size);
 
     Grid(const Grid& other);

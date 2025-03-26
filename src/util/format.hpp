@@ -113,7 +113,8 @@ public:
             sb.appendFormat(
                 "unexpected number of formatter args (num_args={}, "
                 "num_formatters={})",
-                num_args, num_formatters);
+                num_args,
+                num_formatters);
             throw std::runtime_error(sb.str());
         }
 
@@ -132,7 +133,8 @@ private:
     const char* mFormatString;
     Size mLength;
 
-    Index writeLiterals(StringBuffer& sb, const std::vector<Token>& tokens,
+    Index writeLiterals(StringBuffer& sb,
+                        const std::vector<Token>& tokens,
                         const Index start) {
         Index i = start, n = tokens.size();
         while (i < n && tokens[i].kind != Token::Kind::Formatter) {

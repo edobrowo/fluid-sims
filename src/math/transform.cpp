@@ -64,7 +64,9 @@ Matrix4D rotateZ(const f32 angle) {
     return rotate(angle, Vector3D(0.0f, 0.0f, 1.0f));
 }
 
-Matrix4D perspective_fovy(const f32 fovy, const f32 aspect, const f32 n,
+Matrix4D perspective_fovy(const f32 fovy,
+                          const f32 aspect,
+                          const f32 n,
                           const f32 f) {
     const f32 h = ::tan(fovy / 2.0f);
 
@@ -80,8 +82,12 @@ Matrix4D perspective_fovy(const f32 fovy, const f32 aspect, const f32 n,
     // clang-format on
 }
 
-Matrix4D orthographic(const f32 l, const f32 r, const f32 b, const f32 t,
-                      const f32 n, const f32 f) {
+Matrix4D orthographic(const f32 l,
+                      const f32 r,
+                      const f32 b,
+                      const f32 t,
+                      const f32 n,
+                      const f32 f) {
     // clang-format off
     return Matrix4D(
         {
@@ -94,7 +100,8 @@ Matrix4D orthographic(const f32 l, const f32 r, const f32 b, const f32 t,
     // clang-format on
 }
 
-Matrix4D lookat(const Vector3D& eye, const Vector3D& target,
+Matrix4D lookat(const Vector3D& eye,
+                const Vector3D& target,
                 const Vector3D& up) {
     const Vector3D d((target - eye).normalized());
     const Vector3D r(cross(d, up).normalized());

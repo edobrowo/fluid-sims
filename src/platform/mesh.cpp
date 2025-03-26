@@ -47,14 +47,18 @@ void Mesh::buffer() {
     glBindBuffer(GL_ARRAY_BUFFER, mVBO);
     glep();
 
-    glBufferData(GL_ARRAY_BUFFER, mVertices.size() * sizeof(Mesh::Vertex),
-                 mVertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER,
+                 mVertices.size() * sizeof(Mesh::Vertex),
+                 mVertices.data(),
+                 GL_STATIC_DRAW);
     glep();
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
     glep();
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndices.size() * sizeof(GLushort),
-                 mIndices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                 mIndices.size() * sizeof(GLushort),
+                 mIndices.data(),
+                 GL_STATIC_DRAW);
     glep();
 
     glBindVertexArray(0);
@@ -94,7 +98,11 @@ void Mesh::create() {
 
     // Position.
     glVertexAttribPointer(
-        0, 3, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vertex),
+        0,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(Mesh::Vertex),
         reinterpret_cast<GLvoid*>(offsetof(Mesh::Vertex, position)));
     glep();
     glEnableVertexAttribArray(0);
@@ -102,7 +110,11 @@ void Mesh::create() {
 
     // Tex coords.
     glVertexAttribPointer(
-        1, 2, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vertex),
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(Mesh::Vertex),
         reinterpret_cast<GLvoid*>(offsetof(Mesh::Vertex, uv)));
     glep();
     glEnableVertexAttribArray(1);

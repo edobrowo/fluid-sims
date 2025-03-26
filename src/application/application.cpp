@@ -96,43 +96,49 @@ void Application::registerGlfwCallbacks() {
 }
 
 void Application::errorCallback(int error, const char* description) {
-    eprintln("GLFW error code: {}\nGLFW error description: {}", error,
-             description);
+    eprintln(
+        "GLFW error code: {}\nGLFW error description: {}", error, description);
 }
 
 void Application::cursorEnterWindowCallBack(GLFWwindow* window, int entered) {
     getInstance()->onCursorEnterWindow(entered);
 }
 
-void Application::mouseMoveCallBack(GLFWwindow* window, double xPos,
+void Application::mouseMoveCallBack(GLFWwindow* window,
+                                    double xPos,
                                     double yPos) {
     getInstance()->onMouseMove(
         Vector2D(static_cast<f32>(xPos), static_cast<f32>(yPos)));
 }
 
-void Application::mouseButtonPressCallBack(GLFWwindow* window, int button,
-                                           int actions, int mods) {
+void Application::mouseButtonPressCallBack(GLFWwindow* window,
+                                           int button,
+                                           int actions,
+                                           int mods) {
     getInstance()->onMouseButtonPress(button, actions, mods);
 }
 
-void Application::mouseScrollCallBack(GLFWwindow* window, double xOffSet,
+void Application::mouseScrollCallBack(GLFWwindow* window,
+                                      double xOffSet,
                                       double yOffSet) {
     getInstance()->onMouseScroll(
         Vector2D(static_cast<f32>(xOffSet), static_cast<f32>(yOffSet)));
 }
 
-void Application::keyPressCallBack(GLFWwindow* window, int key, int scancode,
-                                   int action, int mods) {
+void Application::keyPressCallBack(
+    GLFWwindow* window, int key, int scancode, int action, int mods) {
     getInstance()->onKeyPress(key, action, mods);
 }
 
-void Application::windowResizeCallBack(GLFWwindow* window, int width,
+void Application::windowResizeCallBack(GLFWwindow* window,
+                                       int width,
                                        int height) {
     getInstance()->onWindowResize(static_cast<u32>(width),
                                   static_cast<u32>(height));
 }
 
-void Application::framebufferResizeCallback(GLFWwindow* window, int width,
+void Application::framebufferResizeCallback(GLFWwindow* window,
+                                            int width,
                                             int height) {
     getInstance()->onFramebufferResize(static_cast<u32>(width),
                                        static_cast<u32>(height));

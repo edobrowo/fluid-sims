@@ -42,12 +42,14 @@ void Solver::advect() {
     mAdvectV.swap();
 }
 
-void Solver::addDensity(const Vector2D& pos, const Vector2D& size,
+void Solver::addDensity(const Vector2D& pos,
+                        const Vector2D& size,
                         const f32 d) {
     mMac.d.add(pos, size, d);
 }
 
-void Solver::addVelocity(const Vector2D& pos, const Vector2D& size,
+void Solver::addVelocity(const Vector2D& pos,
+                         const Vector2D& size,
                          const Vector2D& u) {
     mMac.u.add(pos, size, u[0]);
     mMac.v.add(pos, size, u[1]);
