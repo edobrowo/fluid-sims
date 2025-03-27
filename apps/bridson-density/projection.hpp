@@ -41,16 +41,16 @@ private:
     /// @brief Builds the pressure matrix.
     void buildPressureMatrix(const f32 dt, const f32 density);
 
-    /// @brief Builds the preconditioner.
-    void buildPreconditioner(const f32 tuning, const f32 safety);
-
     /// @brief Solves the Poisson equation for pressure projection using
     /// Conjugate Gradient iteration.
-    void solvePressureEquation();
+    void solvePressureEquation(const f32 tuning, const f32 safety);
 
     /// @brief Applies the pressure update to the velocity field. Enforces the
     /// velocity field to be divergence-free.
     void applyPressureUpdate(const f32 dt, const f32 density);
+
+    /// @brief Builds the preconditioner.
+    void buildPreconditioner(const f32 tuning, const f32 safety);
 
     /// @brief Applies the preconditioner.
     void applyPreconditioner(std::vector<f32>& dst, const std::vector<f32>& b);

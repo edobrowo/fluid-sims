@@ -16,7 +16,7 @@ MACGrid::MACGrid(const i32 rows, const i32 cols, const f32 cell_size)
     p.fill(0.0f);
     d.fill(0.0f);
 
-    label.fill(Label::Fluid);
+    label.fill(Label::Empty);
     label.setSolidBorder();
 }
 

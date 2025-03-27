@@ -24,8 +24,7 @@ void Projection::operator()(const f32 dt, const f32 density) {
 
     buildDivergences();
     buildPressureMatrix(dt, density);
-    buildPreconditioner(tau, sigma);
-    solvePressureEquation();
+    solvePressureEquation(tau, sigma);
     applyPressureUpdate(dt, density);
 }
 
@@ -44,7 +43,38 @@ void Projection::buildDivergences() {
     }
 }
 
-void Projection::solvePressureEquation() {
+void Projection::buildPressureMatrix(const f32 dt, const f32 density) {
+    // Page 78, Figure 5.5.
+
+    const f32 scale = dt / (density * mMac.cellSize() * mMac.cellSize());
+
+    std::fill(mAdiag.begin(), mAdiag.end(), 0.0f);
+    std::fill(mAx.begin(), mAx.end(), 0.0f);
+    std::fill(mAy.begin(), mAy.end(), 0.0f);
+
+    for (i32 j = 0; j < mMac.ny(); ++j) {
+        for (i32 i = 0; i < mMac.nx(); ++i) {
+            const Index index = j * mMac.nx() + i;
+
+            // Enforce solid-wall boundaries at the edges of the viewport.
+            if (i < mMac.nx() - 1) {
+                mAdiag[index] += scale;
+                mAdiag[index + 1] += scale;
+                mAx[index] = -scale;
+            }
+
+            if (j < mMac.ny() - 1) {
+                mAdiag[index] += scale;
+                mAdiag[index + mMac.nx()] += scale;
+                mAy[index] = -scale;
+            }
+        }
+    }
+}
+
+void Projection::solvePressureEquation(const f32 tuning, const f32 safety) {
+    buildPreconditioner(tuning, safety);
+
     // Initial guess of zeros.
     mMac.p.fill(0.0f);
 
@@ -115,35 +145,6 @@ void Projection::applyPressureUpdate(const f32 dt, const f32 density) {
     for (i32 i = 0; i < mMac.nx(); ++i) {
         mMac.v(i, 0) = 0.0f;
         mMac.v(i, mMac.ny()) = 0.0f;
-    }
-}
-
-void Projection::buildPressureMatrix(const f32 dt, const f32 density) {
-    // Page 78, Figure 5.5.
-
-    const f32 scale = dt / (density * mMac.cellSize() * mMac.cellSize());
-
-    std::fill(mAdiag.begin(), mAdiag.end(), 0.0f);
-    std::fill(mAx.begin(), mAx.end(), 0.0f);
-    std::fill(mAy.begin(), mAy.end(), 0.0f);
-
-    for (i32 j = 0; j < mMac.ny(); ++j) {
-        for (i32 i = 0; i < mMac.nx(); ++i) {
-            const Index index = j * mMac.nx() + i;
-
-            // Enforce solid-wall boundaries at the edges of the viewport.
-            if (i < mMac.nx() - 1) {
-                mAdiag[index] += scale;
-                mAdiag[index + 1] += scale;
-                mAx[index] = -scale;
-            }
-
-            if (j < mMac.ny() - 1) {
-                mAdiag[index] += scale;
-                mAdiag[index + mMac.nx()] += scale;
-                mAy[index] = -scale;
-            }
-        }
     }
 }
 

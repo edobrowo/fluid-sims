@@ -16,11 +16,6 @@ f32 Solver::color(const Vector2i& cell) const {
 
 void Solver::step() {
     // See Page 20.
-    // Advection occurs after projection so you can add external forces outside
-    // of the solver. Forces are added by the client caller (see addDensity and
-    // addVelocity).
-
-    mMac.updateLabels();
 
     // 1. Advect density and velocity.
     advect();
@@ -30,12 +25,16 @@ void Solver::step() {
     // 2. Add external forces.
     const Vector2D pos(0.45f, 0.2f);
     const Vector2D size(0.1f, 0.01f);
+    const float d = 1.0f;
+    const Vector2D u(0.0, 3.0);
+    addForces(pos, size, d, u);
 
-    addDensity(pos, size, 1.0);
-    addVelocity(pos, size, Vector2D(0.0, 3.0));
+    mMac.updateLabels();
 
     // 3. Project the pressure to make the velocity field divergence free.
     project();
+
+    mMac.updateLabels();
 }
 
 void Solver::project() {
@@ -53,15 +52,11 @@ void Solver::advect() {
     mAdvectV.swap();
 }
 
-void Solver::addDensity(const Vector2D& pos,
-                        const Vector2D& size,
-                        const f32 d) {
+void Solver::addForces(const Vector2D& pos,
+                       const Vector2D& size,
+                       const f32 d,
+                       const Vector2D& u) {
     mMac.d.add(pos, size, d);
-}
-
-void Solver::addVelocity(const Vector2D& pos,
-                         const Vector2D& size,
-                         const Vector2D& u) {
     mMac.u.add(pos, size, u[0]);
     mMac.v.add(pos, size, u[1]);
 }

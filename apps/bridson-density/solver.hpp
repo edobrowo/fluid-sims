@@ -17,19 +17,17 @@ public:
     /// @brief Updates the solver by mTimestep.
     void step();
 
-    /// @brief Adds density to the specified region.
-    void addDensity(const Vector2D& pos, const Vector2D& size, const f32 d);
-
-    /// @brief Adds velocity to the specified region.
-    void addVelocity(const Vector2D& pos,
-                     const Vector2D& size,
-                     const Vector2D& u);
-
 private:
     /// @brief Calculates and applies the pressure necessary to
     ///  make u divergence free and enforces solid wall boundary
     ///  conditions.
     void project();
+
+    /// @brief Adds external forces (density and velocity).
+    void addForces(const Vector2D& pos,
+                   const Vector2D& size,
+                   const f32 d,
+                   const Vector2D& u);
 
     /// @brief Advects density and velocity through the current velocity grid.
     void advect();
