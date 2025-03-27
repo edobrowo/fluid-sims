@@ -6,16 +6,16 @@ Advection::Advection(Grid& q, Grid& u, Grid& v)
 
 void Advection::operator()(const f32 dt) {
     // Page 32.
-    for (i32 iy = 0; iy < mQ.ny(); ++iy) {
-        for (i32 ix = 0; ix < mQ.nx(); ++ix) {
+    for (i32 j = 0; j < mQ.ny(); ++j) {
+        for (i32 i = 0; i < mQ.nx(); ++i) {
             // Construct the gridspace position at the current cell center.
-            const Vector2D grid_pos = Vector2D(ix, iy) + mQ.cellCenter();
+            const Vector2D grid_pos = Vector2D(i, j) + mQ.cellCenter();
 
             // Semi-Lagrangian backwards integration in time over (u, v).
             const Vector2D initial_pos = backtrace(grid_pos, dt);
 
             // Interpolate from from the grid and set the new value.
-            mBack(ix, iy) = mQ.interp(initial_pos);
+            mBack(i, j) = mQ.interp(initial_pos);
         }
     }
 }

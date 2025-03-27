@@ -5,6 +5,7 @@ MACGrid::MACGrid(const i32 rows, const i32 cols, const f32 cell_size)
       v(rows + 1, cols, Vector2D(0.5f, 0.0f), cell_size),
       p(rows, cols, Vector2D(0.5f, 0.5f), cell_size),
       d(rows, cols, Vector2D(0.5f, 0.5f), cell_size),
+      label(rows, cols),
       mNx(cols),
       mNy(rows),
       mFacesX(cols + 1),
@@ -14,6 +15,9 @@ MACGrid::MACGrid(const i32 rows, const i32 cols, const f32 cell_size)
     v.fill(0.0f);
     p.fill(0.0f);
     d.fill(0.0f);
+
+    label.fill(Label::Fluid);
+    label.setSolidBorder();
 }
 
 i32 MACGrid::nx() const {
@@ -40,16 +44,33 @@ i32 MACGrid::facesY() const {
     return mFacesY;
 }
 
-bool MACGrid::isCellInBounds(const i32 ix, const i32 iy) const {
-    return ix < mNx && iy < mNy;
+bool MACGrid::isEmpty(const i32 i, const i32 j) const {
+    return label(i, j) == Label::Empty;
 }
 
-bool MACGrid::isFaceXInBounds(const i32 ix, const i32 iy) const {
-    return ix < mFacesX;
+bool MACGrid::isFluid(const i32 i, const i32 j) const {
+    return label(i, j) == Label::Fluid;
 }
 
-bool MACGrid::isFaceYInBounds(const i32 ix, const i32 iy) const {
-    return iy < mFacesY;
+bool MACGrid::isSolid(const i32 i, const i32 j) const {
+    return label(i, j) == Label::Solid;
+}
+
+void MACGrid::updateLabels() {
+    // A cell has fluid in it if it has non-zero density.
+    for (i32 j = 0; j < mNy; ++j) {
+        for (i32 i = 0; i < mNx; ++i) {
+            if (label(i, j) == Label::Solid) {
+                continue;
+            }
+
+            if (d(i, j) > 0.0f) {
+                label.set(i, j, Label::Fluid);
+            } else {
+                label.set(i, j, Label::Empty);
+            }
+        }
+    }
 }
 
 f32 MACGrid::width() const {

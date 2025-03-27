@@ -20,11 +20,22 @@ void Solver::step() {
     // of the solver. Forces are added by the client caller (see addDensity and
     // addVelocity).
 
-    // 1. Project the pressure to make the velocity field divergence free.
-    project();
+    mMac.updateLabels();
 
-    // 2. Advect density and velocity.
+    // 1. Advect density and velocity.
     advect();
+
+    mMac.updateLabels();
+
+    // 2. Add external forces.
+    const Vector2D pos(0.45f, 0.2f);
+    const Vector2D size(0.1f, 0.01f);
+
+    addDensity(pos, size, 1.0);
+    addVelocity(pos, size, Vector2D(0.0, 3.0));
+
+    // 3. Project the pressure to make the velocity field divergence free.
+    project();
 }
 
 void Solver::project() {

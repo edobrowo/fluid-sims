@@ -53,12 +53,6 @@ void BridsonDensity::init() {
 }
 
 void BridsonDensity::update() {
-    const Vector2D pos(0.45f, 0.2f);
-    const Vector2D size(0.1f, 0.01f);
-
-    mSolver->addDensity(pos, size, 1.0);
-    mSolver->addVelocity(pos, size, Vector2D(0.0, 3.0));
-
     mSolver->step();
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "grid.hpp"
+#include "label_grid.hpp"
 #include "math/vector.hpp"
 #include "util/common.hpp"
 
@@ -21,6 +22,9 @@ public:
     /// @brief Density.
     Grid d;
 
+    /// @brief Cell labels.
+    LabelGrid label;
+
     /// @brief Number of columns in the MAC grid.
     i32 nx() const;
 
@@ -39,23 +43,17 @@ public:
     /// @brief Number of faces holding a value along the Y axis in the MAC grid.
     i32 facesY() const;
 
-    /// @brief Determines whether the index pair corresponds to a cell within
-    /// the (nx(), ny()) bounds of the grid.
-    /// @param ix Column index.
-    /// @param iy Row index.
-    bool isCellInBounds(const i32 ix, const i32 iy) const;
+    /// @brief Indicates whether the specified cell is an Empty cell.
+    bool isEmpty(const i32 i, const i32 j) const;
 
-    /// @brief Determines whether the index pair corresponds to a X-axis face
-    /// within the (nx(), ny()) bounds of the grid.
-    /// @param ix Column index.
-    /// @param iy Row index.
-    bool isFaceXInBounds(const i32 ix, const i32 iy) const;
+    /// @brief Indicates whether the specified cell is a Fluid cell.
+    bool isFluid(const i32 i, const i32 j) const;
 
-    /// @brief Determines whether the index pair corresponds to a Y-axis face
-    /// within the (nx(), ny()) bounds of the grid.
-    /// @param ix Column index.
-    /// @param iy Row index.
-    bool isFaceYInBounds(const i32 ix, const i32 iy) const;
+    /// @brief Indicates whether the specified cell is a Solid cell.
+    bool isSolid(const i32 i, const i32 j) const;
+
+    /// @brief Updates cell labels.
+    void updateLabels();
 
 private:
     /// @brief Width of the MAC grid in world space. Equal to nx() * cellSize().

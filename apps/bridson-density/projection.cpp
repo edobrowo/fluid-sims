@@ -32,14 +32,19 @@ void Projection::operator()(const f32 dt, const f32 density) {
 void Projection::buildDivergences() {
     // Page 72, Figure 5.3.
 
-    const f32 scale = -1.0f / mMac.cellSize();
+    const f32 scale = 1.0f / mMac.cellSize();
 
-    for (i32 iy = 0; iy < mMac.ny(); ++iy) {
-        for (i32 ix = 0; ix < mMac.nx(); ++ix) {
+    for (i32 j = 0; j < mMac.ny(); ++j) {
+        for (i32 i = 0; i < mMac.nx(); ++i) {
+            const Index index = j * mMac.nx() + i;
+            // if (mMac.isFluid(i, j)) {
             // Equation 5.4
-            const Index index = iy * mMac.nx() + ix;
-            mDiv[index] = scale * (mMac.u(ix + 1, iy) - mMac.u(ix, iy) +
-                                   mMac.v(ix, iy + 1) - mMac.v(ix, iy));
+            mDiv[index] = -scale * (mMac.u(i + 1, j) - mMac.u(i, j) +
+                                    mMac.v(i, j + 1) - mMac.v(i, j));
+            // } else {
+            //     // Page 76, Figure 5.4 provides an alternative.
+            //     mDiv[index] = 0.0f;
+            // }
         }
     }
 }
@@ -62,10 +67,10 @@ void Projection::solvePressureEquation() {
         const f32 alpha = sigma / dot(mAux, mSearch);
 
         // Scaled add for grid p.
-        for (i32 iy = 0; iy < mMac.ny(); ++iy) {
-            for (i32 ix = 0; ix < mMac.nx(); ++ix) {
-                const Index index = iy * mMac.nx() + ix;
-                mMac.p(ix, iy) = mMac.p(ix, iy) + alpha * mSearch[index];
+        for (i32 j = 0; j < mMac.ny(); ++j) {
+            for (i32 i = 0; i < mMac.nx(); ++i) {
+                const Index index = j * mMac.nx() + i;
+                mMac.p(i, j) = mMac.p(i, j) + alpha * mSearch[index];
             }
         }
         scaledAdd(mDiv, mDiv, mAux, -alpha);
@@ -87,28 +92,45 @@ void Projection::applyPressureUpdate(const f32 dt, const f32 density) {
     const f32 scale = dt / (density * mMac.cellSize());
 
     // Application of Equation 5.1.
-    for (i32 iy = 0; iy < mMac.ny(); ++iy) {
-        for (i32 ix = 0; ix < mMac.nx(); ++ix) {
-            const f32 p = scale * mMac.p(ix, iy);
+    for (i32 j = 0; j < mMac.ny(); ++j) {
+        for (i32 i = 0; i < mMac.nx(); ++i) {
+            // Update u.
+            // if (mMac.isFluid(i - 1, j) || mMac.isFluid(i, j)) {
+            if (mMac.isSolid(i - 1, j) || mMac.isSolid(i, j)) {
+                mMac.u(i, j) = 0.0f;
+            } else {
+                mMac.u(i, j) -= scale * (mMac.p(i, j) - mMac.p(i - 1, j));
+            }
+            // }
 
-            mMac.u(ix, iy) -= p;
-            mMac.u(ix + 1, iy) += p;
-            mMac.v(ix, iy) -= p;
-            mMac.v(ix, iy + 1) += p;
+            // Update v.
+            // if (mMac.isFluid(i, j - 1) || mMac.isFluid(i, j)) {
+            if (mMac.isSolid(i, j - 1) || mMac.isSolid(i, j)) {
+                mMac.v(i, j) = 0.0f;
+            } else {
+                mMac.v(i, j) -= scale * (mMac.p(i, j) - mMac.p(i, j - 1));
+            }
+            // }
+
+            // const f32 p = scale * mMac.p(i, j);
+            // mMac.u(i, j) -= p;
+            // mMac.u(i + 1, j) += p;
+            // mMac.v(i, j) -= p;
+            // mMac.v(i, j + 1) += p;
         }
     }
 
-    // Boundary conditions. Just treat the boundaries of the window as a solid
-    // boundary around the fluid.
-    for (i32 iy = 0; iy < mMac.ny(); ++iy) {
-        mMac.u(0, iy) = 0.0f;
-        mMac.u(mMac.nx(), iy) = 0.0f;
-    }
+    // // Boundary conditions. Treat the boundaries of the window as a solid
+    // // boundary around the fluid.
+    // for (i32 j = 0; j < mMac.ny(); ++j) {
+    //     mMac.u(0, j) = 0.0f;
+    //     mMac.u(mMac.nx(), j) = 0.0f;
+    // }
 
-    for (i32 ix = 0; ix < mMac.nx(); ++ix) {
-        mMac.v(ix, 0) = 0.0f;
-        mMac.v(ix, mMac.ny()) = 0.0f;
-    }
+    // for (i32 i = 0; i < mMac.nx(); ++i) {
+    //     mMac.v(i, 0) = 0.0f;
+    //     mMac.v(i, mMac.ny()) = 0.0f;
+    // }
 }
 
 void Projection::buildPressureMatrix(const f32 dt, const f32 density) {
@@ -117,26 +139,30 @@ void Projection::buildPressureMatrix(const f32 dt, const f32 density) {
     const f32 scale = dt / (density * mMac.cellSize() * mMac.cellSize());
 
     std::fill(mAdiag.begin(), mAdiag.end(), 0.0f);
+    std::fill(mAx.begin(), mAx.end(), 0.0f);
+    std::fill(mAy.begin(), mAy.end(), 0.0f);
 
-    for (i32 iy = 0; iy < mMac.ny(); ++iy) {
-        for (i32 ix = 0; ix < mMac.nx(); ++ix) {
-            const Index index = iy * mMac.nx() + ix;
+    for (i32 j = 0; j < mMac.ny(); ++j) {
+        for (i32 i = 0; i < mMac.nx(); ++i) {
+            // if (!mMac.isFluid(i, j)) {
+            //     continue;
+            // }
+
+            const Index index = j * mMac.nx() + i;
 
             // Enforce solid-wall boundaries at the edges of the viewport.
-            if (ix < mMac.nx() - 1) {
+            // if (i < mMac.nx() - 1 && mMac.isFluid(i + 1, j)) {
+            if (i < mMac.nx() - 1) {
                 mAdiag[index] += scale;
                 mAdiag[index + 1] += scale;
                 mAx[index] = -scale;
-            } else {
-                mAx[index] = 0.0f;
             }
 
-            if (iy < mMac.ny() - 1) {
+            // if (j < mMac.ny() - 1 && mMac.isFluid(i, j + 1)) {
+            if (j < mMac.ny() - 1) {
                 mAdiag[index] += scale;
                 mAdiag[index + mMac.nx()] += scale;
                 mAy[index] = -scale;
-            } else {
-                mAy[index] = 0.0f;
             }
         }
     }
@@ -146,25 +172,31 @@ void Projection::buildPreconditioner(const f32 tuning, const f32 safety) {
     // Page 87, Figure 5.7.
     // `tuning` is tau, `safety` is sigma.
 
-    for (i32 iy = 0; iy < mMac.ny(); ++iy) {
-        for (i32 ix = 0; ix < mMac.nx(); ++ix) {
-            const Index index = iy * mMac.nx() + ix;
+    for (i32 j = 0; j < mMac.ny(); ++j) {
+        for (i32 i = 0; i < mMac.nx(); ++i) {
+            // if (!mMac.isFluid(i, j)) {
+            //     continue;
+            // }
+
+            const Index index = j * mMac.nx() + i;
 
             f32 e = mAdiag[index];
 
             // Enforce solid-wall boundaries at the edges of the viewport.
-            if (ix > 0) {
+            // if (i > 0 && mMac.isFluid(i - 1, j)) {
+            if (i > 0) {
                 const Index prev = index - 1;
                 const f32 x = mAx[prev] * mPreconditioner[prev];
                 const f32 y = mAy[prev] * mPreconditioner[prev];
-                e = e - x * x + tuning * x * y;
+                e = e - (x * x + tuning * x * y);
             }
 
-            if (iy > 0) {
+            // if (j > 0 && mMac.isFluid(i, j - 1) {
+            if (j > 0) {
                 const Index prev = index - mMac.nx();
                 const f32 x = mAx[prev] * mPreconditioner[prev];
                 const f32 y = mAy[prev] * mPreconditioner[prev];
-                e = e - y * y + tuning * x * y;
+                e = e - (y * y + tuning * x * y);
             }
 
             if (e < safety * mAdiag[index]) {
@@ -180,19 +212,25 @@ void Projection::applyPreconditioner(std::vector<f32>& dst,
                                      const std::vector<f32>& a) {
     // Page 87, Figure 5.8.
 
-    for (i32 iy = 0; iy < mMac.ny(); ++iy) {
-        for (i32 ix = 0; ix < mMac.nx(); ++ix) {
-            const Index index = iy * mMac.nx() + ix;
+    for (i32 j = 0; j < mMac.ny(); ++j) {
+        for (i32 i = 0; i < mMac.nx(); ++i) {
+            // if (!mMac.isFluid(i, j)) {
+            //     continue;
+            // }
+
+            const Index index = j * mMac.nx() + i;
 
             f32 t = a[index];
 
             // Enforce solid-wall boundaries at the edges of the viewport.
-            if (ix > 0) {
+            // if (i > 0 && mMac.isFluid(i - 1, j)) {
+            if (i > 0) {
                 const Index prev = index - 1;
                 t -= mAx[prev] * mPreconditioner[prev] * dst[prev];
             }
 
-            if (iy > 0) {
+            // if (j > 0 && mMac.isFluid(i, j - 1)) {
+            if (j > 0) {
                 const Index prev = index - mMac.nx();
                 t -= mAy[prev] * mPreconditioner[prev] * dst[prev];
             }
@@ -201,18 +239,24 @@ void Projection::applyPreconditioner(std::vector<f32>& dst,
         }
     }
 
-    for (i32 iy = mMac.ny() - 1; iy >= 0; --iy) {
-        for (i32 ix = mMac.nx() - 1; ix >= 0; --ix) {
-            const Index index = iy * mMac.nx() + ix;
+    for (i32 j = mMac.ny() - 1; j >= 0; --j) {
+        for (i32 i = mMac.nx() - 1; i >= 0; --i) {
+            // if (!mMac.isFluid(i, j)) {
+            //     continue;
+            // }
+
+            const Index index = j * mMac.nx() + i;
 
             f32 t = dst[index];
 
             // Enforce solid-wall boundaries at the edges of the viewport.
-            if (ix < mMac.nx() - 1) {
+            // if (i < mMac.nx() - 1 && mMac.isFluid(i + 1, j)) {
+            if (i < mMac.nx() - 1) {
                 t -= mAx[index] * mPreconditioner[index] * dst[index + 1];
             }
 
-            if (iy < mMac.ny() - 1) {
+            // if (j < mMac.ny() - 1 && mMac.isFluid(i, j + 1)) {
+            if (j < mMac.ny() - 1) {
                 t -= mAy[index] * mPreconditioner[index] *
                      dst[index + mMac.nx()];
             }
@@ -230,23 +274,23 @@ f32 Projection::dot(const std::vector<f32>& a,
 }
 
 void Projection::matmul(std::vector<f32>& dst, const std::vector<f32>& b) {
-    for (i32 iy = 0; iy < mMac.ny(); ++iy) {
-        for (i32 ix = 0; ix < mMac.nx(); ++ix) {
-            const Index index = iy * mMac.nx() + ix;
+    for (i32 j = 0; j < mMac.ny(); ++j) {
+        for (i32 i = 0; i < mMac.nx(); ++i) {
+            const Index index = j * mMac.nx() + i;
 
             f32 t = mAdiag[index] * b[index];
 
             // Enforce solid-wall boundaries at the edges of the viewport.
-            if (ix > 0)
+            if (i > 0)
                 t += mAx[index - 1] * b[index - 1];
 
-            if (iy > 0)
+            if (j > 0)
                 t += mAy[index - mMac.nx()] * b[index - mMac.nx()];
 
-            if (ix < mMac.nx() - 1)
+            if (i < mMac.nx() - 1)
                 t += mAx[index] * b[index + 1];
 
-            if (iy < mMac.ny() - 1)
+            if (j < mMac.ny() - 1)
                 t += mAy[index] * b[index + mMac.nx()];
 
             dst[index] = t;

@@ -52,22 +52,22 @@ Grid::~Grid() {
     delete[] mData;
 }
 
-f32 Grid::operator()(const i32 ix, const i32 iy) const {
-    assertm(ix >= 0, "x out of bounds");
-    assertm(ix < mNx, "x out of bounds");
-    assertm(iy >= 0, "y out of bounds");
-    assertm(iy < mNy, "y out of bounds");
+f32 Grid::operator()(const i32 i, const i32 j) const {
+    assertm(i >= 0, "i out of bounds");
+    assertm(i < mNx, "i out of bounds");
+    assertm(j >= 0, "j out of bounds");
+    assertm(j < mNy, "j out of bounds");
 
-    return mData[iy * mNx + ix];
+    return mData[j * mNx + i];
 }
 
-f32& Grid::operator()(const i32 ix, const i32 iy) {
-    assertm(ix >= 0, "x out of bounds");
-    assertm(ix < mNx, "x out of bounds");
-    assertm(iy >= 0, "y out of bounds");
-    assertm(iy < mNy, "y out of bounds");
+f32& Grid::operator()(const i32 i, const i32 j) {
+    assertm(i >= 0, "i out of bounds");
+    assertm(i < mNx, "i out of bounds");
+    assertm(j >= 0, "j out of bounds");
+    assertm(j < mNy, "j out of bounds");
 
-    return mData[iy * mNx + ix];
+    return mData[j * mNx + i];
 }
 
 i32 Grid::nx() const {
@@ -116,18 +116,18 @@ void Grid::add(const Vector2D& world_pos,
     const Vector2D& grid_pos0 = toGridSpace(world_pos);
     const Vector2D& grid_pos1 = toGridSpace(world_pos + size);
 
-    const i32 ix0 = std::fmax(0.0f, static_cast<i32>(grid_pos0[0]));
-    const i32 iy0 = std::fmax(0.0f, static_cast<i32>(grid_pos0[1]));
+    const i32 i0 = std::fmax(0.0f, static_cast<i32>(grid_pos0[0]));
+    const i32 j0 = std::fmax(0.0f, static_cast<i32>(grid_pos0[1]));
 
-    const i32 ix1 = std::fmin(mNx, static_cast<i32>(grid_pos1[0]));
-    const i32 iy1 = std::fmin(mNy, static_cast<i32>(grid_pos1[1]));
+    const i32 i1 = std::fmin(mNx, static_cast<i32>(grid_pos1[0]));
+    const i32 j1 = std::fmin(mNy, static_cast<i32>(grid_pos1[1]));
 
-    const Vector2D g0(ix0, iy0);
-    const Vector2D g1(ix1, iy1);
+    const Vector2D g0(i0, j0);
+    const Vector2D g1(i1, j1);
 
-    for (i32 iy = iy0; iy < iy1; ++iy) {
-        for (i32 ix = ix0; ix < ix1; ++ix) {
-            const Vector2D curr(ix, iy);
+    for (i32 j = j0; j <= j1; ++j) {
+        for (i32 i = i0; i <= i1; ++i) {
+            const Vector2D curr(i, j);
 
             const Vector2D vn =
                 ((2.0f * (curr + Vector2D(0.5f)) * mCellSize - (g0 + g1)) /
@@ -136,8 +136,8 @@ void Grid::add(const Vector2D& world_pos,
 
             const f32 v = math::hermite(l) * value;
 
-            if (std::fabs((*this)(ix, iy)) < std::fabs(v))
-                (*this)(ix, iy) = v;
+            if (std::fabs((*this)(i, j)) < std::fabs(v))
+                (*this)(i, j) = v;
         }
     }
 }
@@ -160,16 +160,16 @@ Vector2D Grid::clampToGrid(const Vector2D& grid_pos) const {
 f32 Grid::lerp(const Vector2D& grid_pos) const {
     const Vector2D pos = clampToGrid(grid_pos);
 
-    const i32 ix = static_cast<i32>(std::floor(pos[0]));
-    const i32 iy = static_cast<i32>(std::floor(pos[1]));
+    const i32 i = static_cast<i32>(std::floor(pos[0]));
+    const i32 j = static_cast<i32>(std::floor(pos[1]));
 
-    const f32 x = pos[0] - static_cast<f32>(ix);
-    const f32 y = pos[1] - static_cast<f32>(iy);
+    const f32 x = pos[0] - static_cast<f32>(i);
+    const f32 y = pos[1] - static_cast<f32>(j);
 
-    const f32 v00 = (*this)(ix, iy);
-    const f32 v01 = (*this)(ix, iy + 1);
-    const f32 v10 = (*this)(ix + 1, iy);
-    const f32 v11 = (*this)(ix + 1, iy + 1);
+    const f32 v00 = (*this)(i, j);
+    const f32 v01 = (*this)(i, j + 1);
+    const f32 v10 = (*this)(i + 1, j);
+    const f32 v11 = (*this)(i + 1, j + 1);
 
     // See page 29 for averaging example.
     return math::lerp(y, math::lerp(x, v11, v01), math::lerp(x, v10, v00));
@@ -178,21 +178,21 @@ f32 Grid::lerp(const Vector2D& grid_pos) const {
 f32 Grid::cerp(const Vector2D& grid_pos) const {
     const Vector2D pos = clampToGrid(grid_pos);
 
-    const i32 ix = static_cast<i32>(std::floor(pos[0]));
-    const i32 iy = static_cast<i32>(std::floor(pos[1]));
+    const i32 i = static_cast<i32>(std::floor(pos[0]));
+    const i32 j = static_cast<i32>(std::floor(pos[1]));
 
-    const f32 x = pos[0] - static_cast<f32>(ix);
-    const f32 y = pos[1] - static_cast<f32>(iy);
+    const f32 x = pos[0] - static_cast<f32>(i);
+    const f32 y = pos[1] - static_cast<f32>(j);
 
-    const i32 x0 = std::max(ix - 1, 0);
-    const i32 x1 = ix;
-    const i32 x2 = ix + 1;
-    const i32 x3 = std::min(ix + 2, mNx - 1);
+    const i32 x0 = std::max(i - 1, 0);
+    const i32 x1 = i;
+    const i32 x2 = i + 1;
+    const i32 x3 = std::min(i + 2, mNx - 1);
 
-    const i32 y0 = std::max(iy - 1, 0);
-    const i32 y1 = iy;
-    const i32 y2 = iy + 1;
-    const i32 y3 = std::min(iy + 2, mNy - 1);
+    const i32 y0 = std::max(j - 1, 0);
+    const i32 y1 = j;
+    const i32 y2 = j + 1;
+    const i32 y3 = std::min(j + 2, mNy - 1);
 
     const f32 q0 = cerp_clamped(
         x, (*this)(x0, y0), (*this)(x1, y0), (*this)(x2, y0), (*this)(x3, y0));

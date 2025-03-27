@@ -17,11 +17,11 @@ public:
 
     ~Grid();
 
-    /// @brief Retrives the value at cell indices (ix, iy).
-    f32 operator()(const i32 ix, const i32 iy) const;
+    /// @brief Retrives the value at cell indices (i, j).
+    f32 operator()(const i32 i, const i32 j) const;
 
-    /// @brief Retrives a reference to the value at cell indices (ix, iy).
-    f32& operator()(const i32 ix, const i32 iy);
+    /// @brief Retrives a reference to the value at cell indices (i, j).
+    f32& operator()(const i32 i, const i32 j);
 
     /// @brief Number of columns in the grid.
     i32 nx() const;
@@ -112,13 +112,13 @@ template <>
 struct FormatWriter<Grid> {
     static void write(const Grid& grid, StringBuffer& sb) {
         sb.putSafe('[');
-        for (Index iy = 0; iy < grid.ny(); ++iy) {
-            for (Index ix = 0; ix < grid.nx(); ++ix) {
-                FormatWriter<f32>::write(grid(ix, iy), sb);
-                if (iy * grid.nx() + ix < grid.cellCount() - 1)
+        for (Index j = 0; j < grid.ny(); ++j) {
+            for (Index i = 0; i < grid.nx(); ++i) {
+                FormatWriter<f32>::write(grid(i, j), sb);
+                if (j * grid.nx() + i < grid.cellCount() - 1)
                     sb.putSafe(',');
             }
-            if (iy < grid.ny() - 1)
+            if (j < grid.ny() - 1)
                 sb.putSafe('\n');
             else
                 sb.putSafe(']');
