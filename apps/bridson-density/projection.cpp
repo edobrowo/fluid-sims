@@ -37,14 +37,9 @@ void Projection::buildDivergences() {
     for (i32 j = 0; j < mMac.ny(); ++j) {
         for (i32 i = 0; i < mMac.nx(); ++i) {
             const Index index = j * mMac.nx() + i;
-            // if (mMac.isFluid(i, j)) {
             // Equation 5.4
             mDiv[index] = -scale * (mMac.u(i + 1, j) - mMac.u(i, j) +
                                     mMac.v(i, j + 1) - mMac.v(i, j));
-            // } else {
-            //     // Page 76, Figure 5.4 provides an alternative.
-            //     mDiv[index] = 0.0f;
-            // }
         }
     }
 }
@@ -95,42 +90,32 @@ void Projection::applyPressureUpdate(const f32 dt, const f32 density) {
     for (i32 j = 0; j < mMac.ny(); ++j) {
         for (i32 i = 0; i < mMac.nx(); ++i) {
             // Update u.
-            // if (mMac.isFluid(i - 1, j) || mMac.isFluid(i, j)) {
             if (mMac.isSolid(i - 1, j) || mMac.isSolid(i, j)) {
                 mMac.u(i, j) = 0.0f;
             } else {
                 mMac.u(i, j) -= scale * (mMac.p(i, j) - mMac.p(i - 1, j));
             }
-            // }
 
             // Update v.
-            // if (mMac.isFluid(i, j - 1) || mMac.isFluid(i, j)) {
             if (mMac.isSolid(i, j - 1) || mMac.isSolid(i, j)) {
                 mMac.v(i, j) = 0.0f;
             } else {
                 mMac.v(i, j) -= scale * (mMac.p(i, j) - mMac.p(i, j - 1));
             }
-            // }
-
-            // const f32 p = scale * mMac.p(i, j);
-            // mMac.u(i, j) -= p;
-            // mMac.u(i + 1, j) += p;
-            // mMac.v(i, j) -= p;
-            // mMac.v(i, j + 1) += p;
         }
     }
 
-    // // Boundary conditions. Treat the boundaries of the window as a solid
-    // // boundary around the fluid.
-    // for (i32 j = 0; j < mMac.ny(); ++j) {
-    //     mMac.u(0, j) = 0.0f;
-    //     mMac.u(mMac.nx(), j) = 0.0f;
-    // }
+    // Boundary conditions. Treat the boundaries of the window as a solid
+    // boundary around the fluid.
+    for (i32 j = 0; j < mMac.ny(); ++j) {
+        mMac.u(0, j) = 0.0f;
+        mMac.u(mMac.nx(), j) = 0.0f;
+    }
 
-    // for (i32 i = 0; i < mMac.nx(); ++i) {
-    //     mMac.v(i, 0) = 0.0f;
-    //     mMac.v(i, mMac.ny()) = 0.0f;
-    // }
+    for (i32 i = 0; i < mMac.nx(); ++i) {
+        mMac.v(i, 0) = 0.0f;
+        mMac.v(i, mMac.ny()) = 0.0f;
+    }
 }
 
 void Projection::buildPressureMatrix(const f32 dt, const f32 density) {
@@ -144,21 +129,15 @@ void Projection::buildPressureMatrix(const f32 dt, const f32 density) {
 
     for (i32 j = 0; j < mMac.ny(); ++j) {
         for (i32 i = 0; i < mMac.nx(); ++i) {
-            // if (!mMac.isFluid(i, j)) {
-            //     continue;
-            // }
-
             const Index index = j * mMac.nx() + i;
 
             // Enforce solid-wall boundaries at the edges of the viewport.
-            // if (i < mMac.nx() - 1 && mMac.isFluid(i + 1, j)) {
             if (i < mMac.nx() - 1) {
                 mAdiag[index] += scale;
                 mAdiag[index + 1] += scale;
                 mAx[index] = -scale;
             }
 
-            // if (j < mMac.ny() - 1 && mMac.isFluid(i, j + 1)) {
             if (j < mMac.ny() - 1) {
                 mAdiag[index] += scale;
                 mAdiag[index + mMac.nx()] += scale;
@@ -174,16 +153,11 @@ void Projection::buildPreconditioner(const f32 tuning, const f32 safety) {
 
     for (i32 j = 0; j < mMac.ny(); ++j) {
         for (i32 i = 0; i < mMac.nx(); ++i) {
-            // if (!mMac.isFluid(i, j)) {
-            //     continue;
-            // }
-
             const Index index = j * mMac.nx() + i;
 
             f32 e = mAdiag[index];
 
             // Enforce solid-wall boundaries at the edges of the viewport.
-            // if (i > 0 && mMac.isFluid(i - 1, j)) {
             if (i > 0) {
                 const Index prev = index - 1;
                 const f32 x = mAx[prev] * mPreconditioner[prev];
@@ -191,7 +165,6 @@ void Projection::buildPreconditioner(const f32 tuning, const f32 safety) {
                 e = e - (x * x + tuning * x * y);
             }
 
-            // if (j > 0 && mMac.isFluid(i, j - 1) {
             if (j > 0) {
                 const Index prev = index - mMac.nx();
                 const f32 x = mAx[prev] * mPreconditioner[prev];
@@ -214,22 +187,16 @@ void Projection::applyPreconditioner(std::vector<f32>& dst,
 
     for (i32 j = 0; j < mMac.ny(); ++j) {
         for (i32 i = 0; i < mMac.nx(); ++i) {
-            // if (!mMac.isFluid(i, j)) {
-            //     continue;
-            // }
-
             const Index index = j * mMac.nx() + i;
 
             f32 t = a[index];
 
             // Enforce solid-wall boundaries at the edges of the viewport.
-            // if (i > 0 && mMac.isFluid(i - 1, j)) {
             if (i > 0) {
                 const Index prev = index - 1;
                 t -= mAx[prev] * mPreconditioner[prev] * dst[prev];
             }
 
-            // if (j > 0 && mMac.isFluid(i, j - 1)) {
             if (j > 0) {
                 const Index prev = index - mMac.nx();
                 t -= mAy[prev] * mPreconditioner[prev] * dst[prev];
@@ -241,21 +208,15 @@ void Projection::applyPreconditioner(std::vector<f32>& dst,
 
     for (i32 j = mMac.ny() - 1; j >= 0; --j) {
         for (i32 i = mMac.nx() - 1; i >= 0; --i) {
-            // if (!mMac.isFluid(i, j)) {
-            //     continue;
-            // }
-
             const Index index = j * mMac.nx() + i;
 
             f32 t = dst[index];
 
             // Enforce solid-wall boundaries at the edges of the viewport.
-            // if (i < mMac.nx() - 1 && mMac.isFluid(i + 1, j)) {
             if (i < mMac.nx() - 1) {
                 t -= mAx[index] * mPreconditioner[index] * dst[index + 1];
             }
 
-            // if (j < mMac.ny() - 1 && mMac.isFluid(i, j + 1)) {
             if (j < mMac.ny() - 1) {
                 t -= mAy[index] * mPreconditioner[index] *
                      dst[index + mMac.nx()];
@@ -280,7 +241,6 @@ void Projection::matmul(std::vector<f32>& dst, const std::vector<f32>& b) {
 
             f32 t = mAdiag[index] * b[index];
 
-            // Enforce solid-wall boundaries at the edges of the viewport.
             if (i > 0)
                 t += mAx[index - 1] * b[index - 1];
 
