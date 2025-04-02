@@ -2,6 +2,7 @@
 
 #include "grid.hpp"
 #include "mac_grid.hpp"
+#include "math/vectorx.hpp"
 
 class Projection {
 public:
@@ -17,7 +18,7 @@ private:
     MACGrid& mMac;
 
     /// @brief Velocity divergences. RHS of the Poisson equation.
-    std::vector<f32> mDiv;
+    VectorXD mDiv;
 
     /// @brief A matrix diagonal.
     std::vector<f32> mAdiag;
@@ -31,13 +32,13 @@ private:
     i32 mFluidCount;
 
     /// @brief Auxiliary vector.
-    std::vector<f32> mAux;
+    VectorXD mAux;
 
     /// @brief Search vector.
-    std::vector<f32> mSearch;
+    VectorXD mSearch;
 
     /// @brief Preconditioner.
-    std::vector<f32> mPreconditioner;
+    VectorXD mPreconditioner;
 
     /// @brief Associates an index with every fluid cell.
     void indexFluidCells();
@@ -60,20 +61,8 @@ private:
     void buildPreconditioner(const f32 tuning, const f32 safety);
 
     /// @brief Applies the preconditioner.
-    void applyPreconditioner(std::vector<f32>& dst, const std::vector<f32>& b);
-
-    /// @brief Dot product of two dynamically-sized vectors.
-    f32 dot(const std::vector<f32>& a, const std::vector<f32>& b) const;
+    void applyPreconditioner(VectorXD& dst, const VectorXD& b);
 
     /// @brief Multiplies the internal pressure matrix with vector b.
-    void matmul(std::vector<f32>& dst, const std::vector<f32>& b);
-
-    /// @brief Computes a + b * s.
-    void scaledAdd(std::vector<f32>& dst,
-                   const std::vector<f32>& a,
-                   const std::vector<f32>& b,
-                   const f32 s);
-
-    /// @brief Returns maximum absolute value in vector a.
-    f32 infinityNorm(const std::vector<f32>& a) const;
+    void applyA(VectorXD& dst, const VectorXD& b);
 };

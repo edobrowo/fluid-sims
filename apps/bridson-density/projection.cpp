@@ -89,13 +89,13 @@ void Projection::solvePressureEquation(const f32 tuning, const f32 safety) {
     applyPreconditioner(mAux, mDiv);
     mSearch = mAux;
 
-    if (infinityNorm(mDiv) < tol)
+    if (mDiv.infinityNorm() < tol)
         return;
 
     f32 sigma = dot(mAux, mDiv);
 
     for (i32 iter = 0; iter < cNumberOfCGIterations; ++iter) {
-        matmul(mAux, mSearch);
+        applyA(mAux, mSearch);
 
         const f32 alpha = sigma / dot(mAux, mSearch);
 
@@ -107,9 +107,9 @@ void Projection::solvePressureEquation(const f32 tuning, const f32 safety) {
             }
         }
 
-        scaledAdd(mDiv, mDiv, mAux, -alpha);
+        mDiv = mDiv + -alpha * mAux;
 
-        if (infinityNorm(mDiv) < tol)
+        if (mDiv.infinityNorm() < tol)
             return;
 
         applyPreconditioner(mAux, mDiv);
@@ -117,7 +117,7 @@ void Projection::solvePressureEquation(const f32 tuning, const f32 safety) {
         const f32 sigma_new = dot(mAux, mDiv);
         const f32 beta = sigma_new / sigma;
 
-        scaledAdd(mSearch, mAux, mSearch, beta);
+        mSearch = mAux + beta * mSearch;
         sigma = sigma_new;
     }
 }
@@ -156,7 +156,7 @@ void Projection::buildPreconditioner(const f32 tuning, const f32 safety) {
     // Page 87, Figure 5.7.
     // `tuning` is referred to as tau, and `safety` is referred to as sigma.
 
-    std::fill(mPreconditioner.begin(), mPreconditioner.end(), 0.0f);
+    mPreconditioner.fill(0.0f);
 
     for (i32 j = 0; j < mMac.ny(); ++j) {
         for (i32 i = 0; i < mMac.nx(); ++i) {
@@ -191,8 +191,7 @@ void Projection::buildPreconditioner(const f32 tuning, const f32 safety) {
     }
 }
 
-void Projection::applyPreconditioner(std::vector<f32>& dst,
-                                     const std::vector<f32>& a) {
+void Projection::applyPreconditioner(VectorXD& dst, const VectorXD& a) {
     // Page 87, Figure 5.8.
 
     // First solve Lq = r.
@@ -240,14 +239,7 @@ void Projection::applyPreconditioner(std::vector<f32>& dst,
     }
 }
 
-f32 Projection::dot(const std::vector<f32>& a,
-                    const std::vector<f32>& b) const {
-    f32 result = 0.0f;
-    for (i32 i = 0; i < mMac.cellCount(); ++i) result += a[i] * b[i];
-    return result;
-}
-
-void Projection::matmul(std::vector<f32>& dst, const std::vector<f32>& b) {
+void Projection::applyA(VectorXD& dst, const VectorXD& b) {
     for (i32 j = 0; j < mMac.ny(); ++j) {
         for (i32 i = 0; i < mMac.nx(); ++i) {
             const Index index = j * mMac.nx() + i;
@@ -277,20 +269,6 @@ void Projection::matmul(std::vector<f32>& dst, const std::vector<f32>& b) {
             dst[index] = t;
         }
     }
-}
-
-void Projection::scaledAdd(std::vector<f32>& dst,
-                           const std::vector<f32>& a,
-                           const std::vector<f32>& b,
-                           const f32 s) {
-    for (i32 i = 0; i < mMac.cellCount(); ++i) dst[i] = a[i] + s * b[i];
-}
-
-f32 Projection::infinityNorm(const std::vector<f32>& a) const {
-    f32 max_A = 0.0f;
-    for (i32 i = 0; i < mMac.cellCount(); ++i)
-        max_A = std::fmax(max_A, std::fabs(a[i]));
-    return max_A;
 }
 
 // void Projection::buildDivergences() {
