@@ -26,6 +26,10 @@ private:
     std::vector<f32> mAx;
     std::vector<f32> mAy;
 
+    /// @brief Fluid cell indices for sparse grid access.
+    std::vector<f32> mFluidIndices;
+    i32 mFluidCount;
+
     /// @brief Auxiliary vector.
     std::vector<f32> mAux;
 
@@ -34,6 +38,9 @@ private:
 
     /// @brief Preconditioner.
     std::vector<f32> mPreconditioner;
+
+    /// @brief Associates an index with every fluid cell.
+    void indexFluidCells();
 
     /// @brief Builds the divergence vector (div).
     void buildDivergences();
