@@ -57,6 +57,8 @@ void BridsonDensity::update() {
 }
 
 void BridsonDensity::draw() {
+    println("Frame {}", mFrameCounter);
+
     for (Index row = 0; row < mConfig.rows; ++row) {
         for (Index col = 0; col < mConfig.cols; ++col) {
             const f64 d = mSolver->color(

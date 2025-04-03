@@ -9,9 +9,6 @@ public:
 
     /// @brief Advects the grid through the specified velocity field
     ///  for the given time step, producing a new grid.
-    /// @param u Velocity field along the x axis.
-    /// @param v Velocity field along the y axis.
-    /// @return Grid at the updated state.
     void operator()(const f64 dt);
 
     /// @brief Swaps the back buffer grid with mQ. This must be a separate
