@@ -15,6 +15,8 @@ public:
     const T* data() const;
     const Size size() const;
 
+    void resize(const Size size);
+
     VectorX(const VectorX<T>& other);
     VectorX<T>& operator=(const VectorX<T>& other);
 
@@ -70,6 +72,20 @@ const T* VectorX<T>::data() const {
 template <Numeric T>
 const Size VectorX<T>::size() const {
     return mSize;
+}
+
+template <Numeric T>
+void VectorX<T>::resize(const Size size) {
+    T* components = new T[size];
+
+    std::fill_n(mComponents, mSize, T(0));
+
+    for (Index i = 0; i < std::min(size, mSize); ++i)
+        components[i] = mComponents[i];
+
+    mSize = size;
+    delete[] mComponents;
+    mComponents = components;
 }
 
 template <Numeric T>
@@ -226,7 +242,7 @@ static bool operator!=(const VectorX<T>& lhs, const VectorX<T>& rhs) {
 
 template <Numeric T>
 bool VectorX<T>::isZero() const {
-    return *this == VectorX<T>(mSize, T(0.0));
+    return *this == VectorX<T>(mSize, T(0));
 }
 
 template <Numeric T>
@@ -250,8 +266,8 @@ f32 VectorX<T>::length() const {
 
 template <Numeric T>
 f32 VectorX<T>::infinityNorm() const {
-    f32 result = std::fabs(mComponents[0]);
-    for (Index i = 1; i < mSize; ++i)
+    f32 result = 0.0f;
+    for (Index i = 0; i < mSize; ++i)
         result = std::fmax(result, std::fabs(mComponents[i]));
     return result;
 }
@@ -266,7 +282,7 @@ template <Numeric T>
 struct FormatWriter<VectorX<T>> {
     static void write(const VectorX<T>& value, StringBuffer& sb) {
         sb.append("(");
-        for (Index i = 0; i < value.size(); ++i)
+        for (Index i = 0; i < value.size() - 1; ++i)
             sb.appendFormat("{},", value[i]);
         sb.appendFormat("{}", value[value.size() - 1]);
         sb.append(")");
