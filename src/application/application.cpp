@@ -36,13 +36,13 @@ void Application::cleanup() {
 void Application::onCursorEnterWindow(int entered) {
 }
 
-void Application::onMouseMove(const Vector2D pos) {
+void Application::onMouseMove(const Vector2F pos) {
 }
 
 void Application::onMouseButtonPress(int button, int actions, int mods) {
 }
 
-void Application::onMouseScroll(const Vector2D offset) {
+void Application::onMouseScroll(const Vector2F offset) {
 }
 
 void Application::onKeyPress(int key, int action, int mods) {
@@ -108,7 +108,7 @@ void Application::mouseMoveCallBack(GLFWwindow* window,
                                     double xPos,
                                     double yPos) {
     getInstance()->onMouseMove(
-        Vector2D(static_cast<f32>(xPos), static_cast<f32>(yPos)));
+        Vector2F(static_cast<f32>(xPos), static_cast<f32>(yPos)));
 }
 
 void Application::mouseButtonPressCallBack(GLFWwindow* window,
@@ -122,7 +122,7 @@ void Application::mouseScrollCallBack(GLFWwindow* window,
                                       double xOffSet,
                                       double yOffSet) {
     getInstance()->onMouseScroll(
-        Vector2D(static_cast<f32>(xOffSet), static_cast<f32>(yOffSet)));
+        Vector2F(static_cast<f32>(xOffSet), static_cast<f32>(yOffSet)));
 }
 
 void Application::keyPressCallBack(

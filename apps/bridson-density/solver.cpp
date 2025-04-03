@@ -10,7 +10,7 @@ Solver::Solver(const Config& config)
       mProject(mMac) {
 }
 
-f32 Solver::color(const Vector2i& cell) const {
+f64 Solver::color(const Vector2i& cell) const {
     return mMac.d(cell[0], cell[1]);
 }
 
@@ -23,9 +23,9 @@ void Solver::step() {
     mMac.updateLabels();
 
     // 2. Add external forces.
-    const Vector2D pos(0.45f, 0.2f);
-    const Vector2D size(0.1f, 0.01f);
-    const float d = 1.0f;
+    const Vector2D pos(0.45, 0.2);
+    const Vector2D size(0.1, 0.01);
+    const float d = 1.0;
     const Vector2D u(0.0, 3.0);
     addForces(pos, size, d, u);
 
@@ -54,7 +54,7 @@ void Solver::advect() {
 
 void Solver::addForces(const Vector2D& pos,
                        const Vector2D& size,
-                       const f32 d,
+                       const f64 d,
                        const Vector2D& u) {
     mMac.d.add(pos, size, d);
     mMac.u.add(pos, size, u[0]);

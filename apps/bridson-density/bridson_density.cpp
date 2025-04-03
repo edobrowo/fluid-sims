@@ -31,17 +31,17 @@ void BridsonDensity::init() {
     mProgram.use();
 
     // Set up 2D projection and textured quad.
-    const Matrix4D projection = orthographic(0.0f,
+    const Matrix4F projection = orthographic(0.0f,
                                              static_cast<f32>(mWindowWidth),
                                              0.0f,
                                              static_cast<f32>(mWindowHeight),
                                              -1.0f,
                                              1.0f);
-    mProgram.setUniform<Matrix4D>("projection", projection);
+    mProgram.setUniform<Matrix4F>("projection", projection);
 
-    Matrix4D model =
-        scale(Vector3D(mWindowWidth, mWindowHeight, 0.0f)) * translate(0.5f);
-    mProgram.setUniform<Matrix4D>("model", model);
+    Matrix4F model =
+        scale(Vector3F(mWindowWidth, mWindowHeight, 0.0f)) * translate(0.5f);
+    mProgram.setUniform<Matrix4F>("model", model);
 
     mQuadMesh = Quad();
 
@@ -59,11 +59,11 @@ void BridsonDensity::update() {
 void BridsonDensity::draw() {
     for (Index row = 0; row < mConfig.rows; ++row) {
         for (Index col = 0; col < mConfig.cols; ++col) {
-            const f32 d = mSolver->color(
+            const f64 d = mSolver->color(
                 Vector2i(static_cast<i32>(col), static_cast<i32>(row)));
 
             const GLubyte b =
-                static_cast<GLubyte>(math::clamp(d, 0.0f, 1.0f) * 255.0f);
+                static_cast<GLubyte>(math::clamp(d, 0.0, 1.0) * 255.0);
 
             const Index i = row * mConfig.cols + col;
             mTexData[i * 3] = b;
@@ -84,7 +84,7 @@ void BridsonDensity::draw() {
     ++mFrameCounter;
 }
 
-void BridsonDensity::onMouseMove(const Vector2D pos) {
+void BridsonDensity::onMouseMove(const Vector2F pos) {
     mPrevMousePos = mMousePos;
     mMousePos = pos;
 }

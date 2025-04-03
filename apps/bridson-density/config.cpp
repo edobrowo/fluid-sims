@@ -9,7 +9,7 @@ Config Config::loadFromJson(const std::string& path) {
 
     config.rows = config_file["grid_rows"];
     config.cols = config_file["grid_cols"];
-    config.cellSize = 1.0f / config.rows;
+    config.cellSize = 1.0 / config.rows;
     config.timestep = config_file["timestep"];
     config.density = config_file["density"];
     config.saveFrames = config_file["save_frames"];

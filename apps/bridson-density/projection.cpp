@@ -16,14 +16,14 @@ Projection::Projection(MACGrid& mac)
       mPreconditioner(mMac.cellCount()) {
 }
 
-void Projection::operator()(const f32 dt, const f32 density) {
+void Projection::operator()(const f64 dt, const f64 density) {
     // In general, projection subtracts the pressure gradient from the advected
     // velocity field with external forces applied and enforces the velocity
     // field to be divergence-free. Following Bridson, it also enforces
     // solid-wall boundaries.
 
-    const f32 tau = 0.97f;
-    const f32 sigma = 0.25f;
+    const f64 tau = 0.97;
+    const f64 sigma = 0.25;
 
     indexFluidCells();
     buildDivergences();
@@ -58,10 +58,10 @@ void Projection::indexFluidCells() {
 }
 
 void Projection::buildDivergences() {
-    const f32 scale = 1.0f / mMac.cellSize();
+    const f64 scale = 1.0 / mMac.cellSize();
 
     mDiv.resize(mFluidCount);
-    mDiv.fill(0.0f);
+    mDiv.fill(0.0);
 
     // Page 72, Figure 5.3.
     for (i32 j = 0; j < mMac.ny(); ++j) {
@@ -100,19 +100,19 @@ void Projection::buildDivergences() {
     }
 }
 
-void Projection::buildPressureMatrix(const f32 dt, const f32 density) {
+void Projection::buildPressureMatrix(const f64 dt, const f64 density) {
     // Page 78, Figure 5.5.
 
-    const f32 scale = dt / (density * mMac.cellSize() * mMac.cellSize());
+    const f64 scale = dt / (density * mMac.cellSize() * mMac.cellSize());
 
     mAdiag.resize(mFluidCount);
-    std::fill(mAdiag.begin(), mAdiag.end(), 0.0f);
+    std::fill(mAdiag.begin(), mAdiag.end(), 0.0);
 
     mAx.resize(mFluidCount);
-    std::fill(mAx.begin(), mAx.end(), 0.0f);
+    std::fill(mAx.begin(), mAx.end(), 0.0);
 
     mAy.resize(mFluidCount);
-    std::fill(mAy.begin(), mAy.end(), 0.0f);
+    std::fill(mAy.begin(), mAy.end(), 0.0);
 
     for (i32 j = 0; j < mMac.ny(); ++j) {
         for (i32 i = 0; i < mMac.nx(); ++i) {
@@ -147,7 +147,7 @@ void Projection::buildPressureMatrix(const f32 dt, const f32 density) {
     }
 }
 
-void Projection::solvePressureEquation(const f32 tuning, const f32 safety) {
+void Projection::solvePressureEquation(const f64 tuning, const f64 safety) {
     buildPreconditioner(tuning, safety);
 
     mPressure.resize(mFluidCount);
@@ -155,10 +155,10 @@ void Projection::solvePressureEquation(const f32 tuning, const f32 safety) {
     mSearch.resize(mFluidCount);
 
     // Initial guess of zeros.
-    mPressure.fill(0.0f);
+    mPressure.fill(0.0);
 
     // Tolerance for early return.
-    const f32 tol = 1e-5;
+    const f64 tol = 1e-5;
 
     applyPreconditioner(mAux, mDiv);
     mSearch = mAux;
@@ -166,12 +166,12 @@ void Projection::solvePressureEquation(const f32 tuning, const f32 safety) {
     if (mDiv.infinityNorm() < tol)
         return;
 
-    f32 sigma = dot(mAux, mDiv);
+    f64 sigma = dot(mAux, mDiv);
 
     for (i32 iter = 0; iter < cNumberOfCGIterations; ++iter) {
         applyA(mAux, mSearch);
 
-        const f32 alpha = sigma / dot(mAux, mSearch);
+        const f64 alpha = sigma / dot(mAux, mSearch);
 
         mPressure = mPressure + alpha * mSearch;
         mDiv = mDiv + -alpha * mAux;
@@ -181,18 +181,18 @@ void Projection::solvePressureEquation(const f32 tuning, const f32 safety) {
 
         applyPreconditioner(mAux, mDiv);
 
-        const f32 sigma_new = dot(mAux, mDiv);
-        const f32 beta = sigma_new / sigma;
+        const f64 sigma_new = dot(mAux, mDiv);
+        const f64 beta = sigma_new / sigma;
 
         mSearch = mAux + beta * mSearch;
         sigma = sigma_new;
     }
 }
 
-void Projection::applyPressureUpdate(const f32 dt, const f32 density) {
+void Projection::applyPressureUpdate(const f64 dt, const f64 density) {
     // Based on page 71, Figure 5.2.
 
-    const f32 scale = dt / (density * mMac.cellSize());
+    const f64 scale = dt / (density * mMac.cellSize());
 
     // Application of Equation 5.1.
     for (i32 j = 0; j < mMac.ny(); ++j) {
@@ -200,7 +200,7 @@ void Projection::applyPressureUpdate(const f32 dt, const f32 density) {
             // Update u.
             if (mMac.isFluid(i - 1, j) || mMac.isFluid(i, j)) {
                 if (mMac.isSolid(i - 1, j) || mMac.isSolid(i, j)) {
-                    mMac.u(i, j) = 0.0f;
+                    mMac.u(i, j) = 0.0;
                 } else {
                     mMac.u(i, j) -= scale * (mMac.p(i, j) - mMac.p(i - 1, j));
                 }
@@ -211,7 +211,7 @@ void Projection::applyPressureUpdate(const f32 dt, const f32 density) {
             // Update v.
             if (mMac.isFluid(i, j - 1) || mMac.isFluid(i, j)) {
                 if (mMac.isSolid(i, j - 1) || mMac.isSolid(i, j)) {
-                    mMac.v(i, j) = 0.0f;
+                    mMac.v(i, j) = 0.0;
                 } else {
                     mMac.v(i, j) -= scale * (mMac.p(i, j) - mMac.p(i, j - 1));
                 }
@@ -222,25 +222,25 @@ void Projection::applyPressureUpdate(const f32 dt, const f32 density) {
     }
 }
 
-void Projection::buildPreconditioner(const f32 tuning, const f32 safety) {
+void Projection::buildPreconditioner(const f64 tuning, const f64 safety) {
     // Page 87, Figure 5.7.
     // `tuning` is referred to as tau, and `safety` is referred to as sigma.
 
     mPreconditioner.resize(mFluidCount);
-    mPreconditioner.fill(0.0f);
+    mPreconditioner.fill(0.0);
 
     for (i32 j = 0; j < mMac.ny(); ++j) {
         for (i32 i = 0; i < mMac.nx(); ++i) {
             if (mMac.isFluid(i, j)) {
                 const Index index = mFluidIndices[j * mMac.nx() + i];
 
-                f32 e = mAdiag[index];
+                f64 e = mAdiag[index];
 
                 if (i > 0) {
                     const Index prev = mFluidIndices[j * mMac.nx() + (i - 1)];
 
-                    const f32 x = mAx[prev] * mPreconditioner[prev];
-                    const f32 y = mAy[prev] * mPreconditioner[prev];
+                    const f64 x = mAx[prev] * mPreconditioner[prev];
+                    const f64 y = mAy[prev] * mPreconditioner[prev];
 
                     e = e - (x * x) - tuning * (x * y);
                 }
@@ -248,8 +248,8 @@ void Projection::buildPreconditioner(const f32 tuning, const f32 safety) {
                 if (j > 0) {
                     const Index prev = mFluidIndices[(j - 1) * mMac.nx() + i];
 
-                    const f32 x = mAx[prev] * mPreconditioner[prev];
-                    const f32 y = mAy[prev] * mPreconditioner[prev];
+                    const f64 x = mAx[prev] * mPreconditioner[prev];
+                    const f64 y = mAy[prev] * mPreconditioner[prev];
 
                     e = e - (y * y) - tuning * (x * y);
                 }
@@ -258,7 +258,7 @@ void Projection::buildPreconditioner(const f32 tuning, const f32 safety) {
                     e = mAdiag[index];
                 }
 
-                mPreconditioner[index] = 1.0f / std::sqrt(e);
+                mPreconditioner[index] = 1.0 / std::sqrt(e);
             }
         }
     }
@@ -273,7 +273,7 @@ void Projection::applyPreconditioner(VectorXD& dst, const VectorXD& a) {
             if (mMac.isFluid(i, j)) {
                 const Index index = mFluidIndices[j * mMac.nx() + i];
 
-                f32 t = a[index];
+                f64 t = a[index];
 
                 // Enforce solid-wall boundaries at the edges of the
                 // viewport
@@ -298,7 +298,7 @@ void Projection::applyPreconditioner(VectorXD& dst, const VectorXD& a) {
             if (mMac.isFluid(i, j)) {
                 const Index index = mFluidIndices[j * mMac.nx() + i];
 
-                f32 t = dst[index];
+                f64 t = dst[index];
 
                 // Enforce solid-wall boundaries at the edges of the
                 // viewport.
@@ -324,7 +324,7 @@ void Projection::applyA(VectorXD& dst, const VectorXD& b) {
             if (mMac.isFluid(i, j)) {
                 const Index index = mFluidIndices[j * mMac.nx() + i];
 
-                f32 t = mAdiag[index] * b[index];
+                f64 t = mAdiag[index] * b[index];
 
                 if (i > 0 && mMac.isFluid(i - 1, j)) {
                     const Index prev = mFluidIndices[j * mMac.nx() + (i - 1)];

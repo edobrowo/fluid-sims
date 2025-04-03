@@ -81,9 +81,9 @@ protected:
 
     /// Virtual events.
     virtual void onCursorEnterWindow(int entered);
-    virtual void onMouseMove(const Vector2D pos);
+    virtual void onMouseMove(const Vector2F pos);
     virtual void onMouseButtonPress(int button, int actions, int mods);
-    virtual void onMouseScroll(const Vector2D offset);
+    virtual void onMouseScroll(const Vector2F offset);
     virtual void onKeyPress(int key, int action, int mods);
     virtual void onWindowResize(const u32 width, const u32 height);
     virtual void onFramebufferResize(const u32 width, const u32 height);

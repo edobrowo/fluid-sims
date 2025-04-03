@@ -15,8 +15,8 @@ protected:
     virtual void update() override;
     virtual void draw() override;
 
-    virtual void onMouseMove(const Vector2D pos) override;
-    virtual void onMouseScroll(const Vector2D offset) override;
+    virtual void onMouseMove(const Vector2F pos) override;
+    virtual void onMouseScroll(const Vector2F offset) override;
     virtual void onKeyPress(int key, int action, int mods) override;
     virtual void onFramebufferResize(const u32 width,
                                      const u32 height) override;
@@ -30,7 +30,7 @@ private:
     Camera mCamera;
 
     bool mFirstUpdate;
-    Vector2D mPrevMousePosition;
+    Vector2F mPrevMousePosition;
     f64 mYaw;
     f64 mPitch;
 

@@ -32,10 +32,10 @@ public:
 
     bool isZero() const;
 
-    f32 lengthSqr() const;
-    f32 length() const;
+    T lengthSqr() const;
+    T length() const;
 
-    f32 infinityNorm() const;
+    T infinityNorm() const;
 
     void fill(const T value);
 
@@ -44,7 +44,8 @@ private:
     T* mComponents;
 };
 
-using VectorXD = VectorX<f32>;
+using VectorXF = VectorX<f32>;
+using VectorXD = VectorX<f64>;
 
 template <Numeric T>
 VectorX<T>::VectorX(const Size size) : mSize(size), mComponents(new T[mSize]) {
@@ -246,27 +247,26 @@ bool VectorX<T>::isZero() const {
 }
 
 template <Numeric T>
-f32 dot(VectorX<T> lhs, VectorX<T> rhs) {
+T dot(VectorX<T> lhs, VectorX<T> rhs) {
     assertm(lhs.size() == rhs.size(), "mSize must be equivalent");
-    f32 result = 0.0;
-    for (Index i = 0; i < lhs.size(); ++i)
-        result += static_cast<f32>(lhs[i]) * static_cast<f32>(rhs[i]);
+    T result = 0.0;
+    for (Index i = 0; i < lhs.size(); ++i) result += T(lhs[i]) * T(rhs[i]);
     return result;
 }
 
 template <Numeric T>
-f32 VectorX<T>::lengthSqr() const {
+T VectorX<T>::lengthSqr() const {
     return dot(*this, *this);
 }
 
 template <Numeric T>
-f32 VectorX<T>::length() const {
+T VectorX<T>::length() const {
     return ::sqrt(lengthSqr());
 }
 
 template <Numeric T>
-f32 VectorX<T>::infinityNorm() const {
-    f32 result = 0.0f;
+T VectorX<T>::infinityNorm() const {
+    T result = T(0);
     for (Index i = 0; i < mSize; ++i)
         result = std::fmax(result, std::fabs(mComponents[i]));
     return result;

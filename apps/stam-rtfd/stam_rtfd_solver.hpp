@@ -53,7 +53,7 @@ public:
         mDensity(row, col) += d;
     }
 
-    void addVelocity(const Index row, const Index col, const Vector2D& v) {
+    void addVelocity(const Index row, const Index col, const Vector2F& v) {
         if (row > sDim || col > sDim)
             return;
         mU(row, col) = v[0];
@@ -61,18 +61,33 @@ public:
     }
 
 private:
-    void stepDensity(Grid<N>& x, Grid<N>& x0, Grid<N>& u, Grid<N>& v,
-                     const f32 diffusion, const f32 dt);
+    void stepDensity(Grid<N>& x,
+                     Grid<N>& x0,
+                     Grid<N>& u,
+                     Grid<N>& v,
+                     const f32 diffusion,
+                     const f32 dt);
 
-    void stepVelocity(Grid<N>& u, Grid<N>& v, Grid<N>& u0, Grid<N>& v0,
-                      const f32 viscosity, const f32 dt);
+    void stepVelocity(Grid<N>& u,
+                      Grid<N>& v,
+                      Grid<N>& u0,
+                      Grid<N>& v0,
+                      const f32 viscosity,
+                      const f32 dt);
 
     void addSource(Grid<N>& x, Grid<N>& s, const f32 dt);
 
-    void diffuse(const u32 b, Grid<N>& x, Grid<N>& x0, const f32 diffusion,
+    void diffuse(const u32 b,
+                 Grid<N>& x,
+                 Grid<N>& x0,
+                 const f32 diffusion,
                  const f32 dt);
 
-    void advect(const u32 b, Grid<N>& d, Grid<N>& d0, Grid<N>& u, Grid<N>& v,
+    void advect(const u32 b,
+                Grid<N>& d,
+                Grid<N>& d0,
+                Grid<N>& u,
+                Grid<N>& v,
                 const f32 dt);
 
     void project(Grid<N>& u, Grid<N>& v, Grid<N>& p, Grid<N>& div);
@@ -90,8 +105,11 @@ private:
 };
 
 template <u32 N>
-void StamRTFDSolver<N>::stepDensity(Grid<N>& x, Grid<N>& x0, Grid<N>& u,
-                                    Grid<N>& v, const f32 diffusion,
+void StamRTFDSolver<N>::stepDensity(Grid<N>& x,
+                                    Grid<N>& x0,
+                                    Grid<N>& u,
+                                    Grid<N>& v,
+                                    const f32 diffusion,
                                     const f32 dt) {
     addSource(x, x0, dt);
     std::swap(x, x0);
@@ -101,8 +119,11 @@ void StamRTFDSolver<N>::stepDensity(Grid<N>& x, Grid<N>& x0, Grid<N>& u,
 }
 
 template <u32 N>
-void StamRTFDSolver<N>::stepVelocity(Grid<N>& u, Grid<N>& v, Grid<N>& u0,
-                                     Grid<N>& v0, const f32 viscosity,
+void StamRTFDSolver<N>::stepVelocity(Grid<N>& u,
+                                     Grid<N>& v,
+                                     Grid<N>& u0,
+                                     Grid<N>& v0,
+                                     const f32 viscosity,
                                      const f32 dt) {
     addSource(u, u0, dt);
     addSource(v, v0, dt);
@@ -131,8 +152,8 @@ void StamRTFDSolver<N>::addSource(Grid<N>& x, Grid<N>& s, const f32 dt) {
 }
 
 template <u32 N>
-void StamRTFDSolver<N>::diffuse(const u32 b, Grid<N>& x, Grid<N>& x0,
-                                const f32 diffusion, const f32 dt) {
+void StamRTFDSolver<N>::diffuse(
+    const u32 b, Grid<N>& x, Grid<N>& x0, const f32 diffusion, const f32 dt) {
     const f32 a = dt * diffusion * N * N;
     for (Index k = 0; k < mGaussSeidelIterations; ++k) {
         for (Index row = 1; row <= N; ++row)
@@ -146,18 +167,22 @@ void StamRTFDSolver<N>::diffuse(const u32 b, Grid<N>& x, Grid<N>& x0,
 }
 
 template <u32 N>
-void StamRTFDSolver<N>::advect(const u32 b, Grid<N>& d, Grid<N>& d0, Grid<N>& u,
-                               Grid<N>& v, const f32 dt) {
+void StamRTFDSolver<N>::advect(const u32 b,
+                               Grid<N>& d,
+                               Grid<N>& d0,
+                               Grid<N>& u,
+                               Grid<N>& v,
+                               const f32 dt) {
     const f32 dt0 = dt * N;
     for (Index row = 1; row <= N; ++row) {
         for (Index col = 1; col <= N; ++col) {
-            const f32 x = math::clamp(static_cast<f32>(col) - dt0 * u(row, col),
-                                      0.5f, N + 0.5f);
+            const f32 x = math::clamp(
+                static_cast<f32>(col) - dt0 * u(row, col), 0.5f, N + 0.5f);
             const Index col0 = static_cast<Index>(x);
             const Index col1 = col0 + 1;
 
-            const f32 y = math::clamp(static_cast<f32>(row) - dt0 * v(row, col),
-                                      0.5f, N + 0.5f);
+            const f32 y = math::clamp(
+                static_cast<f32>(row) - dt0 * v(row, col), 0.5f, N + 0.5f);
             const Index row0 = static_cast<Index>(y);
             const Index row1 = row0 + 1;
 
@@ -165,7 +190,8 @@ void StamRTFDSolver<N>::advect(const u32 b, Grid<N>& d, Grid<N>& d0, Grid<N>& u,
             const f32 s = 1.0f - (x - static_cast<f32>(col0));
 
             d(row, col) =
-                math::lerp(s, math::lerp(t, d0(row0, col0), d0(row1, col0)),
+                math::lerp(s,
+                           math::lerp(t, d0(row0, col0), d0(row1, col0)),
                            math::lerp(t, d0(row0, col1), d0(row1, col1)));
         }
     }
@@ -173,7 +199,9 @@ void StamRTFDSolver<N>::advect(const u32 b, Grid<N>& d, Grid<N>& d0, Grid<N>& u,
 }
 
 template <u32 N>
-void StamRTFDSolver<N>::project(Grid<N>& u, Grid<N>& v, Grid<N>& p,
+void StamRTFDSolver<N>::project(Grid<N>& u,
+                                Grid<N>& v,
+                                Grid<N>& p,
                                 Grid<N>& div) {
     for (Index row = 1; row <= N; ++row) {
         for (Index col = 1; col <= N; ++col) {

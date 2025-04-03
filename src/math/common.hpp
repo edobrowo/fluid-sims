@@ -29,7 +29,7 @@ constexpr inline T cube(T value) {
 
 template <Numeric T>
 constexpr inline T step(T value, T threshold) {
-    return value < threshold ? 0.0 : 1.0;
+    return value < threshold ? T(0) : T(1);
 }
 
 template <Numeric T>
@@ -43,12 +43,12 @@ constexpr inline T clamp(T value, T low, T high) {
 
 template <std::floating_point T>
 constexpr inline T unit_clamp(T value) {
-    return clamp(value, 0.0, 1.0);
+    return clamp(value, T(0), T(1));
 }
 
 template <std::floating_point T>
 constexpr inline T lerp(T t, T a, T b) {
-    return t * a + (1.0 - t) * b;
+    return t * a + (T(1) - t) * b;
 }
 
 template <std::floating_point T>
@@ -57,28 +57,28 @@ constexpr inline T cerp(T t, T a, T b, T c, T d) {
     const T t3 = t2 * t;
 
     // clang-format off
-    return (     -0.5 * t +       t2 - 0.5 * t3) * a +
-           (1.0           - 2.5 * t2 + 1.5 * t3) * b +
-           (      0.5 * t + 2.0 * t2 - 1.5 * t3) * c +
-           (              - 0.5 * t2 + 0.5 * t3) * d;
+    return (       - T(0.5) * t +          t2 - T(0.5) * t3) * a +
+           (T(1.0)              - T(2.5) * t2 + T(1.5) * t3) * b +
+           (         T(0.5) * t + T(2.0) * t2 - T(1.5) * t3) * c +
+           (                    - T(0.5) * t2 + T(0.5) * t3) * d;
     // clang-format on
 }
 
 template <Numeric T>
 constexpr inline T scale(T value, T min, T max) {
-    assertm(max - min != 0, "max - min is 0");
+    assertm(max - min != T(0), "max - min is 0");
     return (value - min) / (max - min);
 }
 
 template <Numeric T>
 constexpr inline T map(T value, T min1, T max1, T min2, T max2) {
-    assertm(max1 - min1 != 0, "max1 - min1 is 0");
+    assertm(max1 - min1 != T(0), "max1 - min1 is 0");
     return min2 + (value - min1) / (max1 - min1) * (max2 - min2);
 }
 
 template <Numeric T>
 constexpr inline T hermite(T value) {
-    return value * value * (3.0 - 2.0 * value);
+    return value * value * (T(3) - T(2) * value);
 }
 
 template <Numeric T>
@@ -88,17 +88,17 @@ constexpr inline T smoothstep(T left, T right, T t) {
 
 template <std::integral T>
 constexpr inline T divceil(T num, T denom) {
-    return num / denom + (num % denom != 0);
+    return num / denom + (num % denom != T(0));
 }
 
 template <std::floating_point T>
 constexpr inline T rad(T deg) {
-    return deg * Pi / static_cast<T>(180.0);
+    return deg * Pi / T(180.0);
 }
 
 template <std::floating_point T>
 constexpr inline T deg(T rad) {
-    return rad * static_cast<T>(180.0) / Pi;
+    return rad * T(180.0) / Pi;
 }
 
 }

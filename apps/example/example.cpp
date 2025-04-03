@@ -7,7 +7,7 @@
 const f32 Example::sAttenutation = 0.1f;
 
 Example::Example()
-    : mCamera(Vector3D(0.0f, 0.0f, 3.0f)),
+    : mCamera(Vector3F(0.0f, 0.0f, 3.0f)),
       mFirstUpdate(true),
       mPrevMousePosition(0.0f),
       mYaw(-90.0f),
@@ -66,45 +66,45 @@ void Example::draw() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glep();
 
-    Matrix4D projection = perspective_fovy(math::rad(mCamera.fovY()),
-                                           framebufferAspect(), 0.1f, 100.0f);
-    mProgram.setUniform<Matrix4D>("projection", projection);
+    Matrix4F projection = perspective_fovy(
+        math::rad(mCamera.fovY()), framebufferAspect(), 0.1f, 100.0f);
+    mProgram.setUniform<Matrix4F>("projection", projection);
 
-    const Matrix4D view = mCamera.view();
-    mProgram.setUniform<Matrix4D>("view", view);
+    const Matrix4F view = mCamera.view();
+    mProgram.setUniform<Matrix4F>("view", view);
 
     // clang-format off
-    const Vector3D cube_positions[] = {
-        Vector3D(0.0f,  0.0f,  0.0f),
-        Vector3D(2.0f,  5.0f,  -15.0f),
-        Vector3D(-1.5f, -2.2f, -2.5f),
-        Vector3D(-3.8f, -2.0f, -12.3f),
-        Vector3D(2.4f,  -0.4f, -3.5f),
-        Vector3D(-1.7f, 3.0f,  -7.5f),
-        Vector3D(1.3f,  -2.0f, -2.5f),
-        Vector3D(1.5f,  2.0f,  -2.5f),
-        Vector3D(1.5f,  0.2f,  -1.5f),
-        Vector3D(-1.3f, 1.0f,  -1.5f)
+    const Vector3F cube_positions[] = {
+        Vector3F(0.0f,  0.0f,  0.0f),
+        Vector3F(2.0f,  5.0f,  -15.0f),
+        Vector3F(-1.5f, -2.2f, -2.5f),
+        Vector3F(-3.8f, -2.0f, -12.3f),
+        Vector3F(2.4f,  -0.4f, -3.5f),
+        Vector3F(-1.7f, 3.0f,  -7.5f),
+        Vector3F(1.3f,  -2.0f, -2.5f),
+        Vector3F(1.5f,  2.0f,  -2.5f),
+        Vector3F(1.5f,  0.2f,  -1.5f),
+        Vector3F(-1.3f, 1.0f,  -1.5f)
     };
     // clang-format on
 
     for (Index i = 0; i < 10; ++i) {
-        Matrix4D model = translate(cube_positions[i]) *
+        Matrix4F model = translate(cube_positions[i]) *
                          rotate(static_cast<f32>(math::rad(i * 20.0f)),
-                                Vector3D(1.0f, 0.3f, 0.5f));
-        mProgram.setUniform<Matrix4D>("model", model);
+                                Vector3F(1.0f, 0.3f, 0.5f));
+        mProgram.setUniform<Matrix4F>("model", model);
 
         mCubeMesh.render();
     }
 }
 
-void Example::onMouseMove(const Vector2D pos) {
+void Example::onMouseMove(const Vector2F pos) {
     if (mFirstUpdate) {
         mPrevMousePosition = pos;
         mFirstUpdate = false;
     }
 
-    Vector2D offset(pos[0] - mPrevMousePosition[0],
+    Vector2F offset(pos[0] - mPrevMousePosition[0],
                     mPrevMousePosition[1] - pos[1]);
     offset *= sAttenutation;
 
@@ -116,7 +116,7 @@ void Example::onMouseMove(const Vector2D pos) {
     mCamera.rotate(mYaw, 0.0f, mPitch);
 }
 
-void Example::onMouseScroll(const Vector2D offset) {
+void Example::onMouseScroll(const Vector2F offset) {
     const f32 fovy = math::clamp(mCamera.fovY() - offset[1], 1.0f, 45.0f);
     mCamera.setFovY(fovy);
 }

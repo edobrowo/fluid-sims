@@ -12,7 +12,7 @@ public:
     ~Solver() = default;
 
     /// @brief Retrieves the color at the specified cell.
-    f32 color(const Vector2i& cell) const;
+    f64 color(const Vector2i& cell) const;
 
     /// @brief Updates the solver by mTimestep.
     void step();
@@ -26,7 +26,7 @@ private:
     /// @brief Adds external forces (density and velocity).
     void addForces(const Vector2D& pos,
                    const Vector2D& size,
-                   const f32 d,
+                   const f64 d,
                    const Vector2D& u);
 
     /// @brief Advects density and velocity through the current velocity grid.
@@ -36,10 +36,10 @@ private:
     MACGrid mMac;
 
     /// @brief Timestep that the solver is advanced by each step.
-    f32 mTimestep;
+    f64 mTimestep;
 
     /// @brief Fluid density.
-    f32 mDensity;
+    f64 mDensity;
 
     /// @brief Advection over density.
     Advection mAdvectDensity;

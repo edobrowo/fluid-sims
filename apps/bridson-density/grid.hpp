@@ -9,7 +9,7 @@ public:
     Grid(const i32 nx,
          const i32 ny,
          const Vector2D& cell_center,
-         const f32 cell_size);
+         const f64 cell_size);
 
     Grid(const Grid& other);
 
@@ -18,10 +18,10 @@ public:
     ~Grid();
 
     /// @brief Retrives the value at cell indices (i, j).
-    f32 operator()(const i32 i, const i32 j) const;
+    f64 operator()(const i32 i, const i32 j) const;
 
     /// @brief Retrives a reference to the value at cell indices (i, j).
-    f32& operator()(const i32 i, const i32 j);
+    f64& operator()(const i32 i, const i32 j);
 
     /// @brief Number of columns in the grid.
     i32 nx() const;
@@ -33,13 +33,13 @@ public:
     i32 cellCount() const;
 
     /// @brief Size of a cell in world space.
-    f32 cellSize() const;
+    f64 cellSize() const;
 
     /// @brief Center of a cell normalized to [0, 1].
     Vector2D cellCenter() const;
 
     /// @brief Retrieve a pointer to the internal buffer.
-    f32* data();
+    f64* data();
 
     /// @brief Converts a worldspace position to a normalized gridspace
     /// position.
@@ -55,42 +55,42 @@ public:
     /// interpolating with the corresponding cell.
     /// @param pos Worldspace position.
     /// @return Computed value at the worldspace position.
-    f32 interp(const Vector2D& grid_pos) const;
+    f64 interp(const Vector2D& grid_pos) const;
 
     /// @brief Fill the grid with a constant value.
     /// @param value Fill value.
-    void fill(const f32 value);
+    void fill(const f64 value);
 
     /// @brief Add a constant value to a rectangular region in the grid.
     /// @param world_pos Position of the region.
     /// @param size Size of the region.
     /// @param value Fill value.
-    void add(const Vector2D& world_pos, const Vector2D& size, const f32 value);
+    void add(const Vector2D& world_pos, const Vector2D& size, const f64 value);
 
     /// @brief Max value in the grid.
-    f32 max() const;
+    f64 max() const;
 
     /// @brief Minimum value in the grid.
-    f32 min() const;
+    f64 min() const;
 
 private:
     /// @brief Offset used to clamp gridspace positions to cell coordinates.
-    const f32 cGridClampOffset = 1.001f;
+    const f64 cGridClampOffset = 1.001;
 
     /// @brief Clamps the gridspace coordinates to be within grid boundaries.
     Vector2D clampToGrid(const Vector2D& grid_pos) const;
 
     /// @brief Linearly interpolates the value at the specified position.
-    f32 lerp(const Vector2D& grid_pos) const;
+    f64 lerp(const Vector2D& grid_pos) const;
 
     /// @brief Cubicly interpolates the value at the specified position.
-    f32 cerp(const Vector2D& grid_pos) const;
+    f64 cerp(const Vector2D& grid_pos) const;
 
     /// @brief Width of the grid in world space. Equal to nx() * cellSize().
-    f32 width() const;
+    f64 width() const;
 
     /// @brief Height of the grid in world space. Equal to ny() * cellSize().
-    f32 height() const;
+    f64 height() const;
 
     /// @brief Number of columns in the grid.
     i32 mNx;
@@ -102,10 +102,10 @@ private:
     Vector2D mCellCenter;
 
     /// @brief Size of a cell.
-    f32 mCellSize;
+    f64 mCellSize;
 
     /// @brief Grid data.
-    f32* mData;
+    f64* mData;
 };
 
 template <>
@@ -114,7 +114,7 @@ struct FormatWriter<Grid> {
         sb.putSafe('[');
         for (Index j = 0; j < grid.ny(); ++j) {
             for (Index i = 0; i < grid.nx(); ++i) {
-                FormatWriter<f32>::write(grid(i, j), sb);
+                FormatWriter<f64>::write(grid(i, j), sb);
                 if (j * grid.nx() + i < grid.cellCount() - 1)
                     sb.putSafe(',');
             }

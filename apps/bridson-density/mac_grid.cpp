@@ -1,20 +1,20 @@
 #include "mac_grid.hpp"
 
 MACGrid::MACGrid(const i32 rows, const i32 cols, const f32 cell_size)
-    : u(rows, cols + 1, Vector2D(0.0f, 0.5f), cell_size),
-      v(rows + 1, cols, Vector2D(0.5f, 0.0f), cell_size),
-      p(rows, cols, Vector2D(0.5f, 0.5f), cell_size),
-      d(rows, cols, Vector2D(0.5f, 0.5f), cell_size),
+    : u(rows, cols + 1, Vector2D(0.0, 0.5), cell_size),
+      v(rows + 1, cols, Vector2D(0.5, 0.0), cell_size),
+      p(rows, cols, Vector2D(0.5, 0.5), cell_size),
+      d(rows, cols, Vector2D(0.5, 0.5), cell_size),
       label(rows, cols),
       mNx(cols),
       mNy(rows),
       mFacesX(cols + 1),
       mFacesY(rows + 1),
       mCellSize(cell_size) {
-    u.fill(0.0f);
-    v.fill(0.0f);
-    p.fill(0.0f);
-    d.fill(0.0f);
+    u.fill(0.0);
+    v.fill(0.0);
+    p.fill(0.0);
+    d.fill(0.0);
 
     label.fill(Label::Empty);
     label.setSolidBorder();
@@ -64,7 +64,7 @@ void MACGrid::updateLabels() {
                 continue;
             }
 
-            if (d(i, j) > 0.0f) {
+            if (d(i, j) > 0.0) {
                 label.set(i, j, Label::Fluid);
             } else {
                 label.set(i, j, Label::Empty);

@@ -18,7 +18,7 @@ public:
     virtual void update() override;
     virtual void draw() override;
 
-    virtual void onMouseMove(const Vector2D pos) override;
+    virtual void onMouseMove(const Vector2F pos) override;
     virtual void onMouseButtonPress(int button, int actions, int mods) override;
     virtual void onKeyPress(int key, int action, int mods) override;
     virtual void onFramebufferResize(const u32 width,
@@ -36,8 +36,8 @@ private:
     std::vector<GLubyte> mTexData;
 
     bool mMouseButtons[GLFW_MOUSE_BUTTON_LAST + 1];
-    Vector2D mPrevMousePos;
-    Vector2D mMousePos;
+    Vector2F mPrevMousePos;
+    Vector2F mMousePos;
 
     struct Config {
         f32 timestep;

@@ -26,7 +26,7 @@ public:
                 const f32 y_angle = math::Pi * v;
 
                 // Determine the position of this quad.
-                const Vector3D position(std::cos(x_angle) * std::sin(y_angle),
+                const Vector3F position(std::cos(x_angle) * std::sin(y_angle),
                                         std::cos(y_angle),
                                         std::sin(x_angle) * std::sin(y_angle));
 

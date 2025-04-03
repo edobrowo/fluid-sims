@@ -6,10 +6,10 @@
 
 namespace {
 
-f32 cerp_clamped(
-    const f32 t, const f32 a, const f32 b, const f32 c, const f32 d) {
-    const f32 min_coeff = std::min(a, std::min(b, std::min(c, d)));
-    const f32 max_coeff = std::max(a, std::max(b, std::max(c, d)));
+f64 cerp_clamped(
+    const f64 t, const f64 a, const f64 b, const f64 c, const f64 d) {
+    const f64 min_coeff = std::min(a, std::min(b, std::min(c, d)));
+    const f64 max_coeff = std::max(a, std::max(b, std::max(c, d)));
     return math::clamp(math::cerp(t, a, b, c, d), min_coeff, max_coeff);
 }
 
@@ -18,16 +18,16 @@ f32 cerp_clamped(
 Grid::Grid(const i32 rows,
            const i32 cols,
            const Vector2D& cell_center,
-           const f32 cell_size)
+           const f64 cell_size)
     : mNx(cols),
       mNy(rows),
-      mCellCenter(cell_center.clamped(0.0f, 1.0f)),
+      mCellCenter(cell_center.clamped(0.0, 1.0)),
       mCellSize(cell_size) {
     assertm(mNy > 0, "number of rows must be positive");
     assertm(mNx > 0, "number of cols must be positive");
-    assertm(mCellSize > 0.0f, "cell size must be positive");
+    assertm(mCellSize > 0.0, "cell size must be positive");
 
-    mData = new f32[mNx * mNy];
+    mData = new f64[mNx * mNy];
 }
 
 Grid::Grid(const Grid& other)
@@ -35,7 +35,7 @@ Grid::Grid(const Grid& other)
       mNy(other.mNy),
       mCellCenter(other.mCellCenter),
       mCellSize(other.mCellSize),
-      mData(new f32[other.mNx * other.mNy]) {
+      mData(new f64[other.mNx * other.mNy]) {
     std::copy(other.mData, other.mData + (mNx * mNy), mData);
 }
 
@@ -52,7 +52,7 @@ Grid::~Grid() {
     delete[] mData;
 }
 
-f32 Grid::operator()(const i32 i, const i32 j) const {
+f64 Grid::operator()(const i32 i, const i32 j) const {
     assertm(i >= 0, "i out of bounds");
     assertm(i < mNx, "i out of bounds");
     assertm(j >= 0, "j out of bounds");
@@ -61,7 +61,7 @@ f32 Grid::operator()(const i32 i, const i32 j) const {
     return mData[j * mNx + i];
 }
 
-f32& Grid::operator()(const i32 i, const i32 j) {
+f64& Grid::operator()(const i32 i, const i32 j) {
     assertm(i >= 0, "i out of bounds");
     assertm(i < mNx, "i out of bounds");
     assertm(j >= 0, "j out of bounds");
@@ -82,7 +82,7 @@ i32 Grid::cellCount() const {
     return mNx * mNy;
 }
 
-f32 Grid::cellSize() const {
+f64 Grid::cellSize() const {
     return mCellSize;
 }
 
@@ -90,7 +90,7 @@ Vector2D Grid::cellCenter() const {
     return mCellCenter;
 }
 
-f32* Grid::data() {
+f64* Grid::data() {
     return mData;
 }
 
@@ -102,22 +102,22 @@ Vector2D Grid::toWorldSpace(const Vector2D& grid_pos) const {
     return (grid_pos + mCellCenter) * mCellSize;
 }
 
-f32 Grid::interp(const Vector2D& grid_pos) const {
+f64 Grid::interp(const Vector2D& grid_pos) const {
     return cerp(grid_pos);
 }
 
-void Grid::fill(const f32 value) {
+void Grid::fill(const f64 value) {
     std::fill_n(mData, mNy * mNx, value);
 }
 
 void Grid::add(const Vector2D& world_pos,
                const Vector2D& size,
-               const f32 value) {
+               const f64 value) {
     const Vector2D& grid_pos0 = toGridSpace(world_pos);
     const Vector2D& grid_pos1 = toGridSpace(world_pos + size);
 
-    const i32 i0 = std::fmax(0.0f, static_cast<i32>(grid_pos0[0]));
-    const i32 j0 = std::fmax(0.0f, static_cast<i32>(grid_pos0[1]));
+    const i32 i0 = std::fmax(0.0, static_cast<i32>(grid_pos0[0]));
+    const i32 j0 = std::fmax(0.0, static_cast<i32>(grid_pos0[1]));
 
     const i32 i1 = std::fmin(mNx, static_cast<i32>(grid_pos1[0]));
     const i32 j1 = std::fmin(mNy, static_cast<i32>(grid_pos1[1]));
@@ -130,11 +130,11 @@ void Grid::add(const Vector2D& world_pos,
             const Vector2D curr(i, j);
 
             const Vector2D vn =
-                ((2.0f * (curr + Vector2D(0.5f)) * mCellSize - (g0 + g1)) /
+                ((2.0 * (curr + Vector2D(0.5)) * mCellSize - (g0 + g1)) /
                  (g1 - g0));
-            const f32 l = std::min(std::fabs(vn.length()), 1.0f);
+            const f64 l = std::min(std::fabs(vn.length()), 1.0);
 
-            const f32 v = math::hermite(l) * value;
+            const f64 v = math::hermite(l) * value;
 
             if (std::fabs((*this)(i, j)) < std::fabs(v))
                 (*this)(i, j) = v;
@@ -142,47 +142,47 @@ void Grid::add(const Vector2D& world_pos,
     }
 }
 
-f32 Grid::max() const {
+f64 Grid::max() const {
     return *std::max_element(mData, mData + cellCount());
 }
 
-f32 Grid::min() const {
+f64 Grid::min() const {
     return *std::min_element(mData, mData + cellCount());
 }
 
 Vector2D Grid::clampToGrid(const Vector2D& grid_pos) const {
     const Vector2D upper_bound =
-        Vector2D(static_cast<f32>(mNx) - cGridClampOffset,
-                 static_cast<f32>(mNy) - cGridClampOffset);
-    return (grid_pos - mCellCenter).clamped(Vector2D(0.0f), upper_bound);
+        Vector2D(static_cast<f64>(mNx) - cGridClampOffset,
+                 static_cast<f64>(mNy) - cGridClampOffset);
+    return (grid_pos - mCellCenter).clamped(Vector2D(0.0), upper_bound);
 }
 
-f32 Grid::lerp(const Vector2D& grid_pos) const {
+f64 Grid::lerp(const Vector2D& grid_pos) const {
     const Vector2D pos = clampToGrid(grid_pos);
 
     const i32 i = static_cast<i32>(std::floor(pos[0]));
     const i32 j = static_cast<i32>(std::floor(pos[1]));
 
-    const f32 x = pos[0] - static_cast<f32>(i);
-    const f32 y = pos[1] - static_cast<f32>(j);
+    const f64 x = pos[0] - static_cast<f64>(i);
+    const f64 y = pos[1] - static_cast<f64>(j);
 
-    const f32 v00 = (*this)(i, j);
-    const f32 v01 = (*this)(i, j + 1);
-    const f32 v10 = (*this)(i + 1, j);
-    const f32 v11 = (*this)(i + 1, j + 1);
+    const f64 v00 = (*this)(i, j);
+    const f64 v01 = (*this)(i, j + 1);
+    const f64 v10 = (*this)(i + 1, j);
+    const f64 v11 = (*this)(i + 1, j + 1);
 
     // See page 29 for averaging example.
     return math::lerp(y, math::lerp(x, v11, v01), math::lerp(x, v10, v00));
 }
 
-f32 Grid::cerp(const Vector2D& grid_pos) const {
+f64 Grid::cerp(const Vector2D& grid_pos) const {
     const Vector2D pos = clampToGrid(grid_pos);
 
     const i32 i = static_cast<i32>(std::floor(pos[0]));
     const i32 j = static_cast<i32>(std::floor(pos[1]));
 
-    const f32 x = pos[0] - static_cast<f32>(i);
-    const f32 y = pos[1] - static_cast<f32>(j);
+    const f64 x = pos[0] - static_cast<f64>(i);
+    const f64 y = pos[1] - static_cast<f64>(j);
 
     const i32 x0 = std::max(i - 1, 0);
     const i32 x1 = i;
@@ -194,22 +194,22 @@ f32 Grid::cerp(const Vector2D& grid_pos) const {
     const i32 y2 = j + 1;
     const i32 y3 = std::min(j + 2, mNy - 1);
 
-    const f32 q0 = cerp_clamped(
+    const f64 q0 = cerp_clamped(
         x, (*this)(x0, y0), (*this)(x1, y0), (*this)(x2, y0), (*this)(x3, y0));
-    const f32 q1 = cerp_clamped(
+    const f64 q1 = cerp_clamped(
         x, (*this)(x0, y1), (*this)(x1, y1), (*this)(x2, y1), (*this)(x3, y1));
-    const f32 q2 = cerp_clamped(
+    const f64 q2 = cerp_clamped(
         x, (*this)(x0, y2), (*this)(x1, y2), (*this)(x2, y2), (*this)(x3, y2));
-    const f32 q3 = cerp_clamped(
+    const f64 q3 = cerp_clamped(
         x, (*this)(x0, y3), (*this)(x1, y3), (*this)(x2, y3), (*this)(x3, y3));
 
     return cerp_clamped(y, q0, q1, q2, q3);
 }
 
-f32 Grid::width() const {
-    return static_cast<f32>(mNx) * mCellSize;
+f64 Grid::width() const {
+    return static_cast<f64>(mNx) * mCellSize;
 }
 
-f32 Grid::height() const {
-    return static_cast<f32>(mNy) * mCellSize;
+f64 Grid::height() const {
+    return static_cast<f64>(mNy) * mCellSize;
 }

@@ -29,14 +29,17 @@ void StamRTFD::init() {
     mProgram.build();
     mProgram.use();
 
-    const Matrix4D projection =
-        orthographic(0.0f, static_cast<f32>(mWindowWidth), 0.0f,
-                     static_cast<f32>(mWindowHeight), -1.0f, 1.0f);
-    mProgram.setUniform<Matrix4D>("projection", projection);
+    const Matrix4F projection = orthographic(0.0f,
+                                             static_cast<f32>(mWindowWidth),
+                                             0.0f,
+                                             static_cast<f32>(mWindowHeight),
+                                             -1.0f,
+                                             1.0f);
+    mProgram.setUniform<Matrix4F>("projection", projection);
 
-    Matrix4D model =
-        scale(Vector3D(mWindowWidth, mWindowHeight, 0.0f)) * translate(0.5f);
-    mProgram.setUniform<Matrix4D>("model", model);
+    Matrix4F model =
+        scale(Vector3F(mWindowWidth, mWindowHeight, 0.0f)) * translate(0.5f);
+    mProgram.setUniform<Matrix4F>("model", model);
 
     // Vertex data and attributes
     mQuadMesh = Quad();
@@ -59,7 +62,7 @@ void StamRTFD::update() {
     }
 
     if (mMouseButtons[GLFW_MOUSE_BUTTON_LEFT]) {
-        const Vector2D force = Vector2D(mMousePos[0] - mPrevMousePos[0],
+        const Vector2F force = Vector2F(mMousePos[0] - mPrevMousePos[0],
                                         mPrevMousePos[1] - mMousePos[1]) *
                                mConfig.forceMultiplier;
         const Index col = mMousePos[0] / static_cast<f32>(mWindowWidth) * N;
@@ -89,7 +92,7 @@ void StamRTFD::draw() {
     mQuadMesh.render();
 }
 
-void StamRTFD::onMouseMove(const Vector2D pos) {
+void StamRTFD::onMouseMove(const Vector2F pos) {
     mPrevMousePos = mMousePos;
     mMousePos = pos;
 }

@@ -9,7 +9,7 @@ public:
     Projection(MACGrid& mac);
 
     // Projects using Conjugate Gradient with a Cholesky preconditioner.
-    void operator()(const f32 dt, const f32 density);
+    void operator()(const f64 dt, const f64 density);
 
 private:
     const Size cNumberOfCGIterations = 30;
@@ -21,14 +21,14 @@ private:
     VectorXD mDiv;
 
     /// @brief A matrix diagonal.
-    std::vector<f32> mAdiag;
+    std::vector<f64> mAdiag;
 
     /// @brief A matrix off-diagonals.
-    std::vector<f32> mAx;
-    std::vector<f32> mAy;
+    std::vector<f64> mAx;
+    std::vector<f64> mAy;
 
     /// @brief Fluid cell indices for sparse grid access.
-    std::vector<f32> mFluidIndices;
+    std::vector<f64> mFluidIndices;
     i32 mFluidCount;
 
     /// @brief Pressure solution vector.
@@ -50,18 +50,18 @@ private:
     void buildDivergences();
 
     /// @brief Builds the pressure matrix.
-    void buildPressureMatrix(const f32 dt, const f32 density);
+    void buildPressureMatrix(const f64 dt, const f64 density);
 
     /// @brief Solves the Poisson equation for pressure projection using
     /// Conjugate Gradient iteration.
-    void solvePressureEquation(const f32 tuning, const f32 safety);
+    void solvePressureEquation(const f64 tuning, const f64 safety);
 
     /// @brief Applies the pressure update to the velocity field. Enforces the
     /// velocity field to be divergence-free.
-    void applyPressureUpdate(const f32 dt, const f32 density);
+    void applyPressureUpdate(const f64 dt, const f64 density);
 
     /// @brief Builds the preconditioner.
-    void buildPreconditioner(const f32 tuning, const f32 safety);
+    void buildPreconditioner(const f64 tuning, const f64 safety);
 
     /// @brief Applies the preconditioner.
     void applyPreconditioner(VectorXD& dst, const VectorXD& b);

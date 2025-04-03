@@ -38,9 +38,9 @@ private:
     T mElements[p * q];
 };
 
-using Matrix2D = Matrix<f32, 2, 2>;
-using Matrix3D = Matrix<f32, 3, 3>;
-using Matrix4D = Matrix<f32, 4, 4>;
+using Matrix2D = Matrix<f64, 2, 2>;
+using Matrix3D = Matrix<f64, 3, 3>;
+using Matrix4D = Matrix<f64, 4, 4>;
 
 using Matrix2F = Matrix<f32, 2, 2>;
 using Matrix3F = Matrix<f32, 3, 3>;

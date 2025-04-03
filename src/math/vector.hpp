@@ -32,8 +32,8 @@ public:
 
     bool isZero() const;
 
-    f32 lengthSqr() const;
-    f32 length() const;
+    T lengthSqr() const;
+    T length() const;
 
     Vector<T, dim> normalized() const;
     Vector<T, dim> clamped(T low, T high) const;
@@ -43,9 +43,13 @@ private:
     T mComponents[dim];
 };
 
-using Vector2D = Vector<f32, 2>;
-using Vector3D = Vector<f32, 3>;
-using Vector4D = Vector<f32, 4>;
+using Vector2F = Vector<f32, 2>;
+using Vector3F = Vector<f32, 3>;
+using Vector4F = Vector<f32, 4>;
+
+using Vector2D = Vector<f64, 2>;
+using Vector3D = Vector<f64, 3>;
+using Vector4D = Vector<f64, 4>;
 
 using Vector2i = Vector<i32, 2>;
 using Vector3i = Vector<i32, 3>;
@@ -238,20 +242,19 @@ bool Vector<T, dim>::isZero() const {
 }
 
 template <Numeric T, u32 dim>
-f32 dot(Vector<T, dim> lhs, Vector<T, dim> rhs) {
-    f32 result = 0.0;
-    for (Index i = 0; i < dim; ++i)
-        result += static_cast<f32>(lhs[i]) * static_cast<f32>(rhs[i]);
+T dot(Vector<T, dim> lhs, Vector<T, dim> rhs) {
+    T result = 0.0;
+    for (Index i = 0; i < dim; ++i) result += T(lhs[i]) * T(rhs[i]);
     return result;
 }
 
 template <Numeric T, u32 dim>
-f32 Vector<T, dim>::lengthSqr() const {
+T Vector<T, dim>::lengthSqr() const {
     return dot(*this, *this);
 }
 
 template <Numeric T, u32 dim>
-f32 Vector<T, dim>::length() const {
+T Vector<T, dim>::length() const {
     return ::sqrt(lengthSqr());
 }
 

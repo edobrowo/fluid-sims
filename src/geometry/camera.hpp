@@ -7,28 +7,28 @@
 
 class Camera {
 public:
-    Camera(const Vector3D& pos);
+    Camera(const Vector3F& pos);
     ~Camera() = default;
 
-    Vector3D position() const;
-    void setPosition(const Vector3D& pos);
+    Vector3F position() const;
+    void setPosition(const Vector3F& pos);
 
-    Vector3D front() const;
-    Vector3D up() const;
-    Vector3D right() const;
+    Vector3F front() const;
+    Vector3F up() const;
+    Vector3F right() const;
 
-    Matrix4D view() const;
+    Matrix4F view() const;
 
     void rotate(const f32 yaw, const f32 roll, const f32 pitch);
-    void rotate(const Vector3D& euler);
+    void rotate(const Vector3F& euler);
 
     f32 fovY() const;
     void setFovY(const f32 fovy);
 
 private:
-    Vector3D mPosition;
-    Vector3D mFront;
-    Vector3D mUp;
-    Vector3D mRight;
+    Vector3F mPosition;
+    Vector3F mFront;
+    Vector3F mUp;
+    Vector3F mRight;
     f32 mFovY;
 };

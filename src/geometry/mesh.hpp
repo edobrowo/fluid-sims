@@ -10,8 +10,8 @@ namespace geometry {
 class Mesh {
 public:
     struct Vertex {
-        Vector3D position;
-        Vector2D uv;
+        Vector3F position;
+        Vector2F uv;
     };
 
     Mesh() = default;
