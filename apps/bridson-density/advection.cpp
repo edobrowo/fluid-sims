@@ -8,7 +8,7 @@ void Advection::operator()(const f64 dt) {
     // Page 32.
     for (i32 j = 0; j < mQ.ny(); ++j) {
         for (i32 i = 0; i < mQ.nx(); ++i) {
-            if (mLabel(i, j) == Label::Solid) {
+            if (mLabel.isSolid(i, j)) {
                 continue;
             }
 

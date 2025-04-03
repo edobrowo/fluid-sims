@@ -41,7 +41,7 @@ void Projection::operator()(const f64 dt, const f64 density) {
     // Populate pressure grid with pressure solutions.
     for (i32 j = 0; j < mMac.ny(); ++j) {
         for (i32 i = 0; i < mMac.nx(); ++i) {
-            if (mMac.isFluid(i, j)) {
+            if (mMac.label.isFluid(i, j)) {
                 const Index index = mFluidIndices[j * mMac.nx() + i];
                 mMac.p(i, j) = mPressure[index];
             }
@@ -58,7 +58,7 @@ void Projection::indexFluidCells() {
     std::fill(mFluidIndices.begin(), mFluidIndices.end(), -1);
     for (i32 j = 0; j < mMac.ny(); ++j) {
         for (i32 i = 0; i < mMac.nx(); ++i) {
-            if (mMac.isFluid(i, j)) {
+            if (mMac.label.isFluid(i, j)) {
                 const Index index = j * mMac.nx() + i;
                 mFluidIndices[index] = mFluidCount;
                 ++mFluidCount;
@@ -76,7 +76,7 @@ void Projection::buildDivergences() {
     // Page 72, Figure 5.3.
     for (i32 j = 0; j < mMac.ny(); ++j) {
         for (i32 i = 0; i < mMac.nx(); ++i) {
-            if (mMac.isFluid(i, j)) {
+            if (mMac.label.isFluid(i, j)) {
                 // Equation 5.4
                 const Index index = mFluidIndices[j * mMac.nx() + i];
 
@@ -89,20 +89,20 @@ void Projection::buildDivergences() {
     // Page 76, Figure 5.4.
     for (i32 j = 0; j < mMac.ny(); ++j) {
         for (i32 i = 0; i < mMac.nx(); ++i) {
-            if (mMac.isFluid(i, j)) {
+            if (mMac.label.isFluid(i, j)) {
                 const Index index = mFluidIndices[j * mMac.nx() + i];
 
-                if (mMac.isSolid(i - 1, j)) {
+                if (mMac.label.isSolid(i - 1, j)) {
                     mDiv[index] -= scale * mMac.u(i, j);
                 }
-                if (mMac.isSolid(i + 1, j)) {
+                if (mMac.label.isSolid(i + 1, j)) {
                     mDiv[index] += scale * mMac.u(i + 1, j);
                 }
 
-                if (mMac.isSolid(i, j - 1)) {
+                if (mMac.label.isSolid(i, j - 1)) {
                     mDiv[index] -= scale * mMac.v(i, j);
                 }
-                if (mMac.isSolid(i, j + 1)) {
+                if (mMac.label.isSolid(i, j + 1)) {
                     mDiv[index] += scale * mMac.v(i, j + 1);
                 }
             }
@@ -126,30 +126,30 @@ void Projection::buildPressureMatrix(const f64 dt, const f64 density) {
 
     for (i32 j = 0; j < mMac.ny(); ++j) {
         for (i32 i = 0; i < mMac.nx(); ++i) {
-            if (mMac.isFluid(i, j)) {
+            if (mMac.label.isFluid(i, j)) {
                 const Index index = mFluidIndices[j * mMac.nx() + i];
 
                 // x neighbours
-                if (mMac.isFluid(i - 1, j)) {
+                if (mMac.label.isFluid(i - 1, j)) {
                     mAdiag[index] += scale;
                 }
 
-                if (mMac.isFluid(i + 1, j)) {
+                if (mMac.label.isFluid(i + 1, j)) {
                     mAdiag[index] += scale;
                     mAx[index] = -scale;
-                } else if (mMac.isEmpty(i + 1, j)) {
+                } else if (mMac.label.isEmpty(i + 1, j)) {
                     mAdiag[index] += scale;
                 }
 
                 // y neighbours
-                if (mMac.isFluid(i, j - 1)) {
+                if (mMac.label.isFluid(i, j - 1)) {
                     mAdiag[index] += scale;
                 }
 
-                if (mMac.isFluid(i, j + 1)) {
+                if (mMac.label.isFluid(i, j + 1)) {
                     mAdiag[index] += scale;
                     mAy[index] = -scale;
-                } else if (mMac.isEmpty(i, j + 1)) {
+                } else if (mMac.label.isEmpty(i, j + 1)) {
                     mAdiag[index] += scale;
                 }
             }
@@ -208,8 +208,8 @@ void Projection::applyPressureUpdate(const f64 dt, const f64 density) {
     for (i32 j = 0; j < mMac.ny(); ++j) {
         for (i32 i = 0; i < mMac.nx(); ++i) {
             // Update u.
-            if (mMac.isFluid(i - 1, j) || mMac.isFluid(i, j)) {
-                if (mMac.isSolid(i - 1, j) || mMac.isSolid(i, j)) {
+            if (mMac.label.isFluid(i - 1, j) || mMac.label.isFluid(i, j)) {
+                if (mMac.label.isSolid(i - 1, j) || mMac.label.isSolid(i, j)) {
                     mMac.u(i, j) = 0.0;
                 } else {
                     mMac.u(i, j) -= scale * (mMac.p(i, j) - mMac.p(i - 1, j));
@@ -217,8 +217,8 @@ void Projection::applyPressureUpdate(const f64 dt, const f64 density) {
             }
 
             // Update v.
-            if (mMac.isFluid(i, j - 1) || mMac.isFluid(i, j)) {
-                if (mMac.isSolid(i, j - 1) || mMac.isSolid(i, j)) {
+            if (mMac.label.isFluid(i, j - 1) || mMac.label.isFluid(i, j)) {
+                if (mMac.label.isSolid(i, j - 1) || mMac.label.isSolid(i, j)) {
                     mMac.v(i, j) = 0.0;
                 } else {
                     mMac.v(i, j) -= scale * (mMac.p(i, j) - mMac.p(i, j - 1));
@@ -237,7 +237,7 @@ void Projection::buildPreconditioner(const f64 tuning, const f64 safety) {
 
     for (i32 j = 0; j < mMac.ny(); ++j) {
         for (i32 i = 0; i < mMac.nx(); ++i) {
-            if (mMac.isFluid(i, j)) {
+            if (mMac.label.isFluid(i, j)) {
                 const Index index = mFluidIndices[j * mMac.nx() + i];
 
                 f64 e = mAdiag[index];
@@ -276,19 +276,19 @@ void Projection::applyPreconditioner(VectorXD& dst, const VectorXD& a) {
     // First solve Lq = r.
     for (i32 j = 0; j < mMac.ny(); ++j) {
         for (i32 i = 0; i < mMac.nx(); ++i) {
-            if (mMac.isFluid(i, j)) {
+            if (mMac.label.isFluid(i, j)) {
                 const Index index = mFluidIndices[j * mMac.nx() + i];
 
                 f64 t = a[index];
 
                 // Enforce solid-wall boundaries at the edges of the
                 // viewport
-                if (i > 0 && mMac.isFluid(i - 1, j)) {
+                if (i > 0 && mMac.label.isFluid(i - 1, j)) {
                     const Index prev = mFluidIndices[j * mMac.nx() + (i - 1)];
                     t -= mAx[prev] * mPreconditioner[prev] * dst[prev];
                 }
 
-                if (j > 0 && mMac.isFluid(i, j - 1)) {
+                if (j > 0 && mMac.label.isFluid(i, j - 1)) {
                     const Index prev = mFluidIndices[(j - 1) * mMac.nx() + i];
                     t -= mAy[prev] * mPreconditioner[prev] * dst[prev];
                 }
@@ -301,19 +301,19 @@ void Projection::applyPreconditioner(VectorXD& dst, const VectorXD& a) {
     // Next solve L^Tz = q.
     for (i32 j = mMac.ny() - 1; j >= 0; --j) {
         for (i32 i = mMac.nx() - 1; i >= 0; --i) {
-            if (mMac.isFluid(i, j)) {
+            if (mMac.label.isFluid(i, j)) {
                 const Index index = mFluidIndices[j * mMac.nx() + i];
 
                 f64 t = dst[index];
 
                 // Enforce solid-wall boundaries at the edges of the
                 // viewport.
-                if (i < mMac.nx() - 1 && mMac.isFluid(i + 1, j)) {
+                if (i < mMac.nx() - 1 && mMac.label.isFluid(i + 1, j)) {
                     const Index next = mFluidIndices[j * mMac.nx() + (i + 1)];
                     t -= mAx[index] * mPreconditioner[index] * dst[next];
                 }
 
-                if (j < mMac.ny() - 1 && mMac.isFluid(i, j + 1)) {
+                if (j < mMac.ny() - 1 && mMac.label.isFluid(i, j + 1)) {
                     const Index next = mFluidIndices[(j + 1) * mMac.nx() + i];
                     t -= mAy[index] * mPreconditioner[index] * dst[next];
                 }
@@ -327,27 +327,27 @@ void Projection::applyPreconditioner(VectorXD& dst, const VectorXD& a) {
 void Projection::applyA(VectorXD& dst, const VectorXD& b) {
     for (i32 j = 0; j < mMac.ny(); ++j) {
         for (i32 i = 0; i < mMac.nx(); ++i) {
-            if (mMac.isFluid(i, j)) {
+            if (mMac.label.isFluid(i, j)) {
                 const Index index = mFluidIndices[j * mMac.nx() + i];
 
                 f64 t = mAdiag[index] * b[index];
 
-                if (i > 0 && mMac.isFluid(i - 1, j)) {
+                if (i > 0 && mMac.label.isFluid(i - 1, j)) {
                     const Index prev = mFluidIndices[j * mMac.nx() + (i - 1)];
                     t += mAx[prev] * b[prev];
                 }
 
-                if (j > 0 && mMac.isFluid(i, j - 1)) {
+                if (j > 0 && mMac.label.isFluid(i, j - 1)) {
                     const Index prev = mFluidIndices[(j - 1) * mMac.nx() + i];
                     t += mAy[prev] * b[prev];
                 }
 
-                if (i < mMac.nx() - 1 && mMac.isFluid(i + 1, j)) {
+                if (i < mMac.nx() - 1 && mMac.label.isFluid(i + 1, j)) {
                     const Index next = mFluidIndices[j * mMac.nx() + (i + 1)];
                     t += mAx[index] * b[next];
                 }
 
-                if (j < mMac.ny() - 1 && mMac.isFluid(i, j + 1)) {
+                if (j < mMac.ny() - 1 && mMac.label.isFluid(i, j + 1)) {
                     const Index next = mFluidIndices[(j + 1) * mMac.nx() + i];
                     t += mAy[index] * b[next];
                 }

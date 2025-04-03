@@ -7,26 +7,26 @@ Extrapolation::Extrapolation(Grid& q, LabelGrid& label)
 void Extrapolation::operator()() {
     for (i32 j = 0; j < mQ.ny(); ++j) {
         for (i32 i = 0; i < mQ.nx(); ++i) {
-            if (mLabel(i, j) == Label::Empty) {
+            if (mLabel.isEmpty(i, j)) {
                 u32 neighbour_count = 0;
                 f64 value = 0;
 
                 // x neighbours.
-                if (i > 0 && mLabel(i - 1, j) == Label::Fluid) {
+                if (i > 0 && mLabel.isFluid(i - 1, j)) {
                     value += mQ(i - 1, j);
                     ++neighbour_count;
                 }
-                if (i < mQ.nx() && mLabel(i + 1, j) == Label::Fluid) {
+                if (i < mQ.nx() && mLabel.isFluid(i + 1, j)) {
                     value += mQ(i + 1, j);
                     ++neighbour_count;
                 }
 
                 // y neighbours.
-                if (j > 0 && mLabel(i, j - 1) == Label::Fluid) {
+                if (j > 0 && mLabel.isFluid(i, j - 1)) {
                     value += mQ(i, j - 1);
                     ++neighbour_count;
                 }
-                if (j < mQ.ny() && mLabel(i, j - 1) == Label::Fluid) {
+                if (j < mQ.ny() && mLabel.isFluid(i, j - 1)) {
                     value += mQ(i, j + 1);
                     ++neighbour_count;
                 }

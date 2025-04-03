@@ -8,8 +8,6 @@ MACGrid::MACGrid(const i32 rows, const i32 cols, const f32 cell_size)
       label(rows, cols),
       mNx(cols),
       mNy(rows),
-      mFacesX(cols + 1),
-      mFacesY(rows + 1),
       mCellSize(cell_size) {
     u.fill(0.0);
     v.fill(0.0);
@@ -34,26 +32,6 @@ i32 MACGrid::cellCount() const {
 
 f32 MACGrid::cellSize() const {
     return mCellSize;
-}
-
-i32 MACGrid::facesX() const {
-    return mFacesX;
-}
-
-i32 MACGrid::facesY() const {
-    return mFacesY;
-}
-
-bool MACGrid::isEmpty(const i32 i, const i32 j) const {
-    return label(i, j) == Label::Empty;
-}
-
-bool MACGrid::isFluid(const i32 i, const i32 j) const {
-    return label(i, j) == Label::Fluid;
-}
-
-bool MACGrid::isSolid(const i32 i, const i32 j) const {
-    return label(i, j) == Label::Solid;
 }
 
 void MACGrid::updateLabels() {

@@ -37,21 +37,6 @@ public:
     /// @brief Size of a cell in world space.
     f32 cellSize() const;
 
-    /// @brief Number of faces holding a value along the X axis in the MAC grid.
-    i32 facesX() const;
-
-    /// @brief Number of faces holding a value along the Y axis in the MAC grid.
-    i32 facesY() const;
-
-    /// @brief Indicates whether the specified cell is an Empty cell.
-    bool isEmpty(const i32 i, const i32 j) const;
-
-    /// @brief Indicates whether the specified cell is a Fluid cell.
-    bool isFluid(const i32 i, const i32 j) const;
-
-    /// @brief Indicates whether the specified cell is a Solid cell.
-    bool isSolid(const i32 i, const i32 j) const;
-
     /// @brief Updates cell labels.
     void updateLabels();
 
@@ -68,8 +53,6 @@ private:
 
     i32 mNx;
     i32 mNy;
-    i32 mFacesX;
-    i32 mFacesY;
 
     f32 mCellSize;
 };

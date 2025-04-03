@@ -26,6 +26,18 @@ void LabelGrid::set(const i32 i, const i32 j, const Label label) {
     mData[j * mNx + i] = label;
 }
 
+bool LabelGrid::isEmpty(const i32 i, const i32 j) const {
+    return (*this)(i, j) == Label::Empty;
+}
+
+bool LabelGrid::isFluid(const i32 i, const i32 j) const {
+    return (*this)(i, j) == Label::Fluid;
+}
+
+bool LabelGrid::isSolid(const i32 i, const i32 j) const {
+    return (*this)(i, j) == Label::Solid;
+}
+
 i32 LabelGrid::nx() const {
     return mNx;
 }

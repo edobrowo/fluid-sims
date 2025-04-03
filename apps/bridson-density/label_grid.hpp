@@ -19,6 +19,15 @@ public:
     /// @brief Sets the label at cell indices (i, j).
     void set(const i32 i, const i32 j, const Label label);
 
+    /// @brief Indicates whether the specified cell is an Empty cell.
+    bool isEmpty(const i32 i, const i32 j) const;
+
+    /// @brief Indicates whether the specified cell is a Fluid cell.
+    bool isFluid(const i32 i, const i32 j) const;
+
+    /// @brief Indicates whether the specified cell is a Solid cell.
+    bool isSolid(const i32 i, const i32 j) const;
+
     /// @brief Number of columns in the grid.
     i32 nx() const;
 
