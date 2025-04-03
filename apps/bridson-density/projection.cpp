@@ -27,8 +27,16 @@ void Projection::operator()(const f64 dt, const f64 density) {
 
     indexFluidCells();
     buildDivergences();
+    println("mDiv\n{}", mDiv);
     buildPressureMatrix(dt, density);
+    println("mAdiag\n{}", mAdiag);
+    println("mAx\n{}", mAx);
+    println("mAy\n{}", mAy);
     solvePressureEquation(tau, sigma);
+    println("mPrecon\n{}", mPreconditioner);
+    println("mPressure\n{}", mPressure);
+
+    mMac.p.fill(0.0);
 
     // Populate pressure grid with pressure solutions.
     for (i32 j = 0; j < mMac.ny(); ++j) {
@@ -41,6 +49,8 @@ void Projection::operator()(const f64 dt, const f64 density) {
     }
 
     applyPressureUpdate(dt, density);
+    println("U\n{}", mMac.u);
+    println("V\n{}", mMac.v);
 }
 
 void Projection::indexFluidCells() {
@@ -204,8 +214,6 @@ void Projection::applyPressureUpdate(const f64 dt, const f64 density) {
                 } else {
                     mMac.u(i, j) -= scale * (mMac.p(i, j) - mMac.p(i - 1, j));
                 }
-            } else {
-                // TODO: mark unknown
             }
 
             // Update v.
@@ -215,8 +223,6 @@ void Projection::applyPressureUpdate(const f64 dt, const f64 density) {
                 } else {
                     mMac.v(i, j) -= scale * (mMac.p(i, j) - mMac.p(i, j - 1));
                 }
-            } else {
-                // TODO: mark unknown
             }
         }
     }

@@ -4,9 +4,9 @@ Solver::Solver(const Config& config)
     : mMac(config.rows, config.cols, config.cellSize),
       mTimestep(config.timestep),
       mDensity(config.density),
-      mAdvectDensity(mMac.d, mMac.u, mMac.v),
-      mAdvectU(mMac.u, mMac.u, mMac.v),
-      mAdvectV(mMac.v, mMac.u, mMac.v),
+      mAdvectDensity(mMac.d, mMac.u, mMac.v, mMac.label),
+      mAdvectU(mMac.u, mMac.u, mMac.v, mMac.label),
+      mAdvectV(mMac.v, mMac.u, mMac.v, mMac.label),
       mProject(mMac) {
 }
 
@@ -17,24 +17,26 @@ f64 Solver::color(const Vector2i& cell) const {
 void Solver::step() {
     // See Page 20.
 
-    // 1. Advect density and velocity.
-    advect();
-
     mMac.updateLabels();
 
+    // 1. Advect density and velocity.
+
+    advect();
+
     // 2. Add external forces.
+
     const Vector2D pos(0.45, 0.2);
     const Vector2D size(0.1, 0.01);
     const float d = 1.0;
     const Vector2D u(0.0, 3.0);
+
     addForces(pos, size, d, u);
 
     mMac.updateLabels();
 
     // 3. Project the pressure to make the velocity field divergence free.
-    project();
 
-    mMac.updateLabels();
+    project();
 }
 
 void Solver::project() {

@@ -12,7 +12,7 @@ public:
     void operator()(const f64 dt, const f64 density);
 
 private:
-    const Size cNumberOfCGIterations = 30;
+    const Size cNumberOfCGIterations = 200;
 
     /// @brief MAC grid. Projection acts on the pressure component.
     MACGrid& mMac;
