@@ -31,6 +31,9 @@ private:
     std::vector<f32> mFluidIndices;
     i32 mFluidCount;
 
+    /// @brief Pressure solution vector.
+    VectorXD mPressure;
+
     /// @brief Auxiliary vector.
     VectorXD mAux;
 

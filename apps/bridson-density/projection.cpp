@@ -10,6 +10,7 @@ Projection::Projection(MACGrid& mac)
       mAy(mMac.cellCount()),
       mFluidIndices(mMac.cellCount()),
       mFluidCount(0),
+      mPressure(mMac.cellCount()),
       mAux(mMac.cellCount()),
       mSearch(mMac.cellCount()),
       mPreconditioner(mMac.cellCount()) {
@@ -81,7 +82,7 @@ void Projection::solvePressureEquation(const f32 tuning, const f32 safety) {
     buildPreconditioner(tuning, safety);
 
     // Initial guess of zeros.
-    mMac.p.fill(0.0f);
+    mPressure.fill(0.0f);
 
     // Tolerance for early return.
     const f32 tol = 1e-5;
@@ -99,14 +100,7 @@ void Projection::solvePressureEquation(const f32 tuning, const f32 safety) {
 
         const f32 alpha = sigma / dot(mAux, mSearch);
 
-        // Scaled add for grid p.
-        for (i32 j = 0; j < mMac.ny(); ++j) {
-            for (i32 i = 0; i < mMac.nx(); ++i) {
-                const Index index = j * mMac.nx() + i;
-                mMac.p(i, j) = mMac.p(i, j) + alpha * mSearch[index];
-            }
-        }
-
+        mPressure = mPressure + alpha * mSearch;
         mDiv = mDiv + -alpha * mAux;
 
         if (mDiv.infinityNorm() < tol)
@@ -119,6 +113,14 @@ void Projection::solvePressureEquation(const f32 tuning, const f32 safety) {
 
         mSearch = mAux + beta * mSearch;
         sigma = sigma_new;
+    }
+
+    // Populate pressure grid with pressure solutions.
+    for (i32 j = 0; j < mMac.ny(); ++j) {
+        for (i32 i = 0; i < mMac.nx(); ++i) {
+            const Index index = j * mMac.nx() + i;
+            mMac.p(i, j) = mPressure[index];
+        }
     }
 }
 
