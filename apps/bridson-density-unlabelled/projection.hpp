@@ -2,6 +2,7 @@
 
 #include "grid.hpp"
 #include "mac_grid.hpp"
+#include "math/vectorx.hpp"
 
 class Projection {
 public:
@@ -17,7 +18,7 @@ private:
     MACGrid& mMac;
 
     /// @brief Velocity divergences. RHS of the Poisson equation.
-    std::vector<f64> mDiv;
+    VectorXD mDiv;
 
     /// @brief A matrix diagonal.
     std::vector<f64> mAdiag;
@@ -26,14 +27,17 @@ private:
     std::vector<f64> mAx;
     std::vector<f64> mAy;
 
+    /// @brief Pressure solution vector.
+    VectorXD mPressure;
+
     /// @brief Auxiliary vector.
-    std::vector<f64> mAux;
+    VectorXD mAux;
 
     /// @brief Search vector.
-    std::vector<f64> mSearch;
+    VectorXD mSearch;
 
     /// @brief Preconditioner.
-    std::vector<f64> mPreconditioner;
+    VectorXD mPreconditioner;
 
     /// @brief Builds the divergence vector (div).
     void buildDivergences();
@@ -53,20 +57,8 @@ private:
     void buildPreconditioner(const f64 tuning, const f64 safety);
 
     /// @brief Applies the preconditioner.
-    void applyPreconditioner(std::vector<f64>& dst, const std::vector<f64>& b);
-
-    /// @brief Dot product of two dynamically-sized vectors.
-    f64 dot(const std::vector<f64>& a, const std::vector<f64>& b) const;
+    void applyPreconditioner(VectorXD& dst, const VectorXD& b);
 
     /// @brief Multiplies the internal pressure matrix with vector b.
-    void matmul(std::vector<f64>& dst, const std::vector<f64>& b);
-
-    /// @brief Computes a + b * s.
-    void scaledAdd(std::vector<f64>& dst,
-                   const std::vector<f64>& a,
-                   const std::vector<f64>& b,
-                   const f64 s);
-
-    /// @brief Returns maximum absolute value in vector a.
-    f64 infinityNorm(const std::vector<f64>& a) const;
+    void applyA(VectorXD& dst, const VectorXD& b);
 };

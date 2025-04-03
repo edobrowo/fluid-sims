@@ -8,6 +8,7 @@ Projection::Projection(MACGrid& mac)
       mAdiag(mac.cellCount()),
       mAx(mac.cellCount()),
       mAy(mac.cellCount()),
+      mPressure(mac.cellCount()),
       mAux(mac.cellCount()),
       mSearch(mac.cellCount()),
       mPreconditioner(mac.cellCount()) {
@@ -25,6 +26,15 @@ void Projection::operator()(const f64 dt, const f64 density) {
     buildDivergences();
     buildPressureMatrix(dt, density);
     solvePressureEquation(tau, sigma);
+
+    // Populate pressure grid with pressure solutions.
+    for (i32 j = 0; j < mMac.ny(); ++j) {
+        for (i32 i = 0; i < mMac.nx(); ++i) {
+            const Index index = j * mMac.nx() + i;
+            mMac.p(i, j) = mPressure[index];
+        }
+    }
+
     applyPressureUpdate(dt, density);
 }
 
@@ -76,37 +86,36 @@ void Projection::solvePressureEquation(const f64 tuning, const f64 safety) {
     buildPreconditioner(tuning, safety);
 
     // Initial guess of zeros.
-    mMac.p.fill(0.0);
+    mPressure.fill(0.0);
+
+    // Tolerance for early return.
+    const f64 tol = 1e-5;
 
     applyPreconditioner(mAux, mDiv);
     mSearch = mAux;
 
-    if (infinityNorm(mDiv) < 1e-5)
+    if (mDiv.infinityNorm() < tol)
         return;
 
     f64 sigma = dot(mAux, mDiv);
 
     for (i32 iter = 0; iter < cNumberOfCGIterations; ++iter) {
-        matmul(mAux, mSearch);
+        applyA(mAux, mSearch);
 
         const f64 alpha = sigma / dot(mAux, mSearch);
 
-        // Scaled add for grid p.
-        for (i32 j = 0; j < mMac.ny(); ++j) {
-            for (i32 i = 0; i < mMac.nx(); ++i) {
-                const Index index = j * mMac.nx() + i;
-                mMac.p(i, j) = mMac.p(i, j) + alpha * mSearch[index];
-            }
-        }
-        scaledAdd(mDiv, mDiv, mAux, -alpha);
+        mPressure = mPressure + alpha * mSearch;
+        mDiv = mDiv + -alpha * mAux;
 
-        if (infinityNorm(mDiv) < 1e-5)
+        if (mDiv.infinityNorm() < tol)
             return;
 
         applyPreconditioner(mAux, mDiv);
 
         const f64 sigma_new = dot(mAux, mDiv);
-        scaledAdd(mSearch, mAux, mSearch, sigma_new / sigma);
+        const f64 beta = sigma_new / sigma;
+
+        mSearch = mAux + beta * mSearch;
         sigma = sigma_new;
     }
 }
@@ -174,8 +183,7 @@ void Projection::buildPreconditioner(const f64 tuning, const f64 safety) {
     }
 }
 
-void Projection::applyPreconditioner(std::vector<f64>& dst,
-                                     const std::vector<f64>& a) {
+void Projection::applyPreconditioner(VectorXD& dst, const VectorXD& a) {
     // Page 87, Figure 5.8.
 
     for (i32 j = 0; j < mMac.ny(); ++j) {
@@ -220,14 +228,7 @@ void Projection::applyPreconditioner(std::vector<f64>& dst,
     }
 }
 
-f64 Projection::dot(const std::vector<f64>& a,
-                    const std::vector<f64>& b) const {
-    f64 result = 0.0;
-    for (i32 i = 0; i < mMac.cellCount(); ++i) result += a[i] * b[i];
-    return result;
-}
-
-void Projection::matmul(std::vector<f64>& dst, const std::vector<f64>& b) {
+void Projection::applyA(VectorXD& dst, const VectorXD& b) {
     for (i32 j = 0; j < mMac.ny(); ++j) {
         for (i32 i = 0; i < mMac.nx(); ++i) {
             const Index index = j * mMac.nx() + i;
@@ -249,18 +250,4 @@ void Projection::matmul(std::vector<f64>& dst, const std::vector<f64>& b) {
             dst[index] = t;
         }
     }
-}
-
-void Projection::scaledAdd(std::vector<f64>& dst,
-                           const std::vector<f64>& a,
-                           const std::vector<f64>& b,
-                           const f64 s) {
-    for (i32 i = 0; i < mMac.cellCount(); ++i) dst[i] = a[i] + s * b[i];
-}
-
-f64 Projection::infinityNorm(const std::vector<f64>& a) const {
-    f64 max_A = 0.0;
-    for (i32 i = 0; i < mMac.cellCount(); ++i)
-        max_A = std::fmax(max_A, std::fabs(a[i]));
-    return max_A;
 }
