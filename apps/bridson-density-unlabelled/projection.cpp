@@ -24,14 +24,14 @@ void Projection::operator()(const f64 dt, const f64 density) {
     const f64 sigma = 0.25;
 
     buildDivergences();
-    println("mDiv\n{}", mDiv);
+    // println("mDiv\n{}", mDiv);
     buildPressureMatrix(dt, density);
-    println("mAdiag\n{}", mAdiag);
-    println("mAx\n{}", mAx);
-    println("mAy\n{}", mAy);
+    // println("mAdiag\n{}", mAdiag);
+    // println("mAx\n{}", mAx);
+    // println("mAy\n{}", mAy);
     solvePressureEquation(tau, sigma);
-    println("mPrecon\n{}", mPreconditioner);
-    println("mPressure\n{}", mPressure);
+    // println("mPrecon\n{}", mPreconditioner);
+    // println("mPressure\n{}", mPressure);
 
     // Populate pressure grid with pressure solutions.
     for (i32 j = 0; j < mMac.ny(); ++j) {
@@ -42,8 +42,8 @@ void Projection::operator()(const f64 dt, const f64 density) {
     }
 
     applyPressureUpdate(dt, density);
-    println("U\n{}", mMac.u);
-    println("V\n{}", mMac.v);
+    // println("U\n{}", mMac.u);
+    // println("V\n{}", mMac.v);
 }
 
 void Projection::buildDivergences() {

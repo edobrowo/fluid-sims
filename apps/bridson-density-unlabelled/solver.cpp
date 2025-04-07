@@ -31,6 +31,22 @@ void Solver::step() {
     project();
 }
 
+const Grid& Solver::density() const {
+    return mMac.d;
+}
+
+const Grid& Solver::pressure() const {
+    return mMac.p;
+}
+
+const Grid& Solver::u() const {
+    return mMac.u;
+}
+
+const Grid& Solver::v() const {
+    return mMac.v;
+}
+
 void Solver::project() {
     mProject(mTimestep, mDensity);
 }

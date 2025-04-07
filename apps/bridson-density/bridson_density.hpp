@@ -20,8 +20,6 @@ public:
     virtual void update() override;
     virtual void draw() override;
 
-    virtual void onMouseMove(const Vector2F pos) override;
-    virtual void onMouseButtonPress(int button, int actions, int mods) override;
     virtual void onKeyPress(int key, int action, int mods) override;
     virtual void onFramebufferResize(const u32 width,
                                      const u32 height) override;
@@ -35,12 +33,11 @@ private:
     Texture mTexture;
     std::vector<GLubyte> mTexData;
 
-    bool mMouseButtons[GLFW_MOUSE_BUTTON_LAST + 1];
-    Vector2F mPrevMousePos;
-    Vector2F mMousePos;
-
     std::unique_ptr<Solver> mSolver;
     Config mConfig;
 
     u32 mFrameCounter;
+
+    bool mUpdateOnce;
+    bool mUpdateContinuous;
 };

@@ -17,6 +17,18 @@ public:
     /// @brief Updates the solver by mTimestep.
     void step();
 
+    /// @brief Retrieve a constant reference to the density grid.
+    const Grid& density() const;
+
+    /// @brief Retrieve a constant reference to the pressure grid.
+    const Grid& pressure() const;
+
+    /// @brief Retrieve a constant reference to the velocity u component grid.
+    const Grid& u() const;
+
+    /// @brief Retrieve a constant reference to the velocity v component grid.
+    const Grid& v() const;
+
 private:
     /// @brief Calculates and applies the pressure necessary to
     ///  make u divergence free and enforces solid wall boundary

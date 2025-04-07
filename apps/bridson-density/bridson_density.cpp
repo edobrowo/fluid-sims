@@ -9,7 +9,8 @@
 #include "quad.hpp"
 #include "util/files.hpp"
 
-BridsonDensity::BridsonDensity() {
+BridsonDensity::BridsonDensity()
+    : mUpdateOnce(false), mUpdateContinuous(false) {
 }
 
 void BridsonDensity::init() {
@@ -53,7 +54,10 @@ void BridsonDensity::init() {
 }
 
 void BridsonDensity::update() {
-    mSolver->step();
+    if (mUpdateOnce || mUpdateContinuous) {
+        mSolver->step();
+        mUpdateOnce = false;
+    }
 }
 
 void BridsonDensity::draw() {
@@ -86,19 +90,39 @@ void BridsonDensity::draw() {
     ++mFrameCounter;
 }
 
-void BridsonDensity::onMouseMove(const Vector2F pos) {
-    mPrevMousePos = mMousePos;
-    mMousePos = pos;
-}
-
-void BridsonDensity::onMouseButtonPress(int button, int actions, int mods) {
-    mMouseButtons[button] = actions == GLFW_PRESS;
-}
-
 void BridsonDensity::onKeyPress(int key, int action, int mods) {
     if (action == GLFW_PRESS) {
-        if (key == GLFW_KEY_Q) {
+        switch (key) {
+        case GLFW_KEY_Q:
             quit();
+            break;
+        case GLFW_KEY_SPACE:
+            mUpdateContinuous = !mUpdateContinuous;
+            break;
+        case GLFW_KEY_N:
+            mUpdateOnce = true;
+            break;
+        case GLFW_KEY_R:
+            mSolver = std::make_unique<Solver>(mConfig);
+            break;
+        case GLFW_KEY_D:
+            // Print density.
+            println("DENSITY\n{}", mSolver->density());
+            break;
+        case GLFW_KEY_P:
+            // Print pressure.
+            println("PRESSURE\n{}", mSolver->pressure());
+            break;
+        case GLFW_KEY_U:
+            // Print velocity u component.
+            println("U\n{}", mSolver->u());
+            break;
+        case GLFW_KEY_V:
+            // Print velocity v component.
+            println("V\n{}", mSolver->v());
+            break;
+        default:
+            break;
         }
     }
 }
