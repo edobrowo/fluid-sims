@@ -1,7 +1,7 @@
 #include "example.hpp"
 
 #include "geometry/cube.hpp"
-#include "math/common.hpp"
+#include "math/numeric.hpp"
 #include "util/files.hpp"
 
 const f32 Example::sAttenutation = 0.1f;

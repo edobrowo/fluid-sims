@@ -1,7 +1,7 @@
 #pragma once
 
 #include "grid.hpp"
-#include "math/common.hpp"
+#include "math/numeric.hpp"
 #include "math/vector.hpp"
 #include "util/common.hpp"
 #include "util/format.hpp"

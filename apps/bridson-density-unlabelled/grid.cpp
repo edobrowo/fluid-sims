@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include "math/common.hpp"
+#include "math/numeric.hpp"
 
 namespace {
 
