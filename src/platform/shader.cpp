@@ -1,4 +1,4 @@
-#include "platform/shader.hpp"
+#include "shader.hpp"
 
 using namespace gl;
 

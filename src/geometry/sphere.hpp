@@ -1,6 +1,6 @@
 #pragma once
 
-#include "math/common.hpp"
+#include "math/arithmetic.hpp"
 #include "math/vector.hpp"
 #include "mesh.hpp"
 #include "util/common.hpp"
@@ -15,15 +15,15 @@ public:
         // Construct a quad for every rows-column pair.
         for (u32 y = 0; y <= rows; ++y) {
             for (u32 x = 0; x <= cols; ++x) {
-                // Determine the x angle. Ranges between [0, 2 * Pi] (i.e.,
+                // Determine the x angle. Ranges between [0, 2 * pi] (i.e.,
                 // forming a ring around the sphere).
                 const float u = static_cast<f32>(x) / static_cast<f32>(cols);
-                const f32 x_angle = 2.0f * math::Pi * u;
+                const f32 x_angle = 2.0f * math::pi<f32>() * u;
 
-                // Determine the y angle. Ranges between [0, Pi] (i.e., from the
+                // Determine the y angle. Ranges between [0, pi] (i.e., from the
                 // bottom point of the sphere to the top point).
                 const float v = static_cast<f32>(y) / static_cast<f32>(rows);
-                const f32 y_angle = math::Pi * v;
+                const f32 y_angle = math::pi<f32>() * v;
 
                 // Determine the position of this quad.
                 const Vector3F position(std::cos(x_angle) * std::sin(y_angle),

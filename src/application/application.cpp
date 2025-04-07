@@ -1,6 +1,6 @@
 #include "application.hpp"
 
-#include "format.hpp"
+#include "util/format.hpp"
 
 std::shared_ptr<Application> Application::mInstance = nullptr;
 

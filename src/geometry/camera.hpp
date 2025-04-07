@@ -1,6 +1,6 @@
 #pragma once
 
-#include "math/common.hpp"
+#include "math/arithmetic.hpp"
 #include "math/transform.hpp"
 #include "math/vector.hpp"
 #include "util/common.hpp"

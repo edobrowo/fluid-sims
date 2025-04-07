@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common.hpp"
+#include "arithmetic.hpp"
 #include "vector.hpp"
 
 template <std::floating_point T, u32 p, u32 q>

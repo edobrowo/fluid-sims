@@ -1,4 +1,4 @@
-#include "geometry/camera.hpp"
+#include "camera.hpp"
 
 Camera::Camera(const Vector3F& pos)
     : mPosition(pos),
