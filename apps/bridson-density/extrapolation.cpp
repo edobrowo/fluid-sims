@@ -26,7 +26,7 @@ void Extrapolation::operator()() {
                     value += mQ(i, j - 1);
                     ++neighbour_count;
                 }
-                if (j < mQ.ny() && mLabel.isFluid(i, j - 1)) {
+                if (j < mQ.ny() && mLabel.isFluid(i, j + 1)) {
                     value += mQ(i, j + 1);
                     ++neighbour_count;
                 }
