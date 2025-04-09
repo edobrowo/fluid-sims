@@ -35,10 +35,12 @@ f32 MACGrid::cellSize() const {
 }
 
 void MACGrid::updateLabels() {
+    label.reset();
+
     // A cell has fluid in it if it has non-zero density.
     for (i32 j = 0; j < mNy; ++j) {
         for (i32 i = 0; i < mNx; ++i) {
-            if (label(i, j) == Label::Solid) {
+            if (label.isSolid(i, j)) {
                 continue;
             }
 

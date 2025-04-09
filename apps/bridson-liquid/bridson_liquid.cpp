@@ -53,15 +53,11 @@ void BridsonLiquid::init() {
 }
 
 void BridsonLiquid::update() {
-    if (mUpdateOnce || mUpdateContinuous) {
+    if (mUpdateOnce || mUpdateContinuous)
         mSolver->step();
-        mUpdateOnce = false;
-    }
 }
 
 void BridsonLiquid::draw() {
-    println("Frame {}", mFrameCounter);
-
     for (Index row = 0; row < mConfig.rows; ++row) {
         for (Index col = 0; col < mConfig.cols; ++col) {
             const f64 d = mSolver->color(
@@ -82,11 +78,15 @@ void BridsonLiquid::draw() {
 
     mQuadMesh.render();
 
-    if (mConfig.saveFrames) {
-        saveCurrentFrame();
-    }
+    if (mUpdateOnce || mUpdateContinuous) {
+        println("Frame {}", mFrameCounter);
+        if (mConfig.saveFrames) {
+            saveCurrentFrame();
+        }
 
-    ++mFrameCounter;
+        ++mFrameCounter;
+        mUpdateOnce = false;
+    }
 }
 
 void BridsonLiquid::onKeyPress(int key, int action, int mods) {
