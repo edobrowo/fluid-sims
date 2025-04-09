@@ -1,12 +1,12 @@
-#include "stam_rtfd.hpp"
+#include "stam_density.hpp"
 
 #include "quad.hpp"
 #include "util/files.hpp"
 
-StamRTFD::StamRTFD() : mTexData(N * N * 3) {
+StamDensity::StamDensity() : mTexData(N * N * 3) {
 }
 
-void StamRTFD::init() {
+void StamDensity::init() {
     glfwSetInputMode(mWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
     files::Json config = files::read_to_json(asset("config.json").c_str());
@@ -51,7 +51,7 @@ void StamRTFD::init() {
     mProgram.setUniform<i32>("sampler", 0);
 }
 
-void StamRTFD::update() {
+void StamDensity::update() {
     mSolver.reset();
 
     if (mMouseButtons[GLFW_MOUSE_BUTTON_RIGHT]) {
@@ -85,23 +85,23 @@ void StamRTFD::update() {
     mSolver.step(mConfig.timestep, mConfig.viscosity, mConfig.diffusion);
 }
 
-void StamRTFD::draw() {
+void StamDensity::draw() {
     mTexture.image(N, N, mTexData.data());
     mTexture.bind(0);
 
     mQuadMesh.render();
 }
 
-void StamRTFD::onMouseMove(const Vector2F pos) {
+void StamDensity::onMouseMove(const Vector2F pos) {
     mPrevMousePos = mMousePos;
     mMousePos = pos;
 }
 
-void StamRTFD::onMouseButtonPress(int button, int actions, int mods) {
+void StamDensity::onMouseButtonPress(int button, int actions, int mods) {
     mMouseButtons[button] = actions == GLFW_PRESS;
 }
 
-void StamRTFD::onKeyPress(int key, int action, int mods) {
+void StamDensity::onKeyPress(int key, int action, int mods) {
     if (action == GLFW_PRESS) {
         if (key == GLFW_KEY_Q) {
             quit();
@@ -109,6 +109,6 @@ void StamRTFD::onKeyPress(int key, int action, int mods) {
     }
 }
 
-void StamRTFD::onFramebufferResize(const u32 width, const u32 height) {
+void StamDensity::onFramebufferResize(const u32 width, const u32 height) {
     glViewport(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height));
 }

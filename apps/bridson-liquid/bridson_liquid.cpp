@@ -1,4 +1,4 @@
-#include "bridson_density_unlabelled.hpp"
+#include "bridson_liquid.hpp"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
@@ -9,11 +9,10 @@
 #include "quad.hpp"
 #include "util/files.hpp"
 
-BridsonDensity::BridsonDensity()
-    : mUpdateOnce(false), mUpdateContinuous(false) {
+BridsonLiquid::BridsonLiquid() : mUpdateOnce(false), mUpdateContinuous(false) {
 }
 
-void BridsonDensity::init() {
+void BridsonLiquid::init() {
     glfwSetInputMode(mWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
     // Load config.
@@ -53,21 +52,23 @@ void BridsonDensity::init() {
     mSolver = std::make_unique<Solver>(mConfig);
 }
 
-void BridsonDensity::update() {
+void BridsonLiquid::update() {
     if (mUpdateOnce || mUpdateContinuous) {
         mSolver->step();
         mUpdateOnce = false;
     }
 }
 
-void BridsonDensity::draw() {
+void BridsonLiquid::draw() {
+    println("Frame {}", mFrameCounter);
+
     for (Index row = 0; row < mConfig.rows; ++row) {
         for (Index col = 0; col < mConfig.cols; ++col) {
-            const f32 d = mSolver->color(
+            const f64 d = mSolver->color(
                 Vector2i(static_cast<i32>(col), static_cast<i32>(row)));
 
             const GLubyte b =
-                static_cast<GLubyte>(math::clamp(d, 0.0f, 1.0f) * 255.0f);
+                static_cast<GLubyte>(math::clamp(d, 0.0, 1.0) * 255.0);
 
             const Index i = row * mConfig.cols + col;
             mTexData[i * 3] = b;
@@ -88,7 +89,7 @@ void BridsonDensity::draw() {
     ++mFrameCounter;
 }
 
-void BridsonDensity::onKeyPress(int key, int action, int mods) {
+void BridsonLiquid::onKeyPress(int key, int action, int mods) {
     if (action == GLFW_PRESS) {
         switch (key) {
         case GLFW_KEY_Q:
@@ -125,11 +126,11 @@ void BridsonDensity::onKeyPress(int key, int action, int mods) {
     }
 }
 
-void BridsonDensity::onFramebufferResize(const u32 width, const u32 height) {
+void BridsonLiquid::onFramebufferResize(const u32 width, const u32 height) {
     glViewport(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height));
 }
 
-void BridsonDensity::saveCurrentFrame() const {
+void BridsonLiquid::saveCurrentFrame() const {
     if (mTexData.empty()) {
         eprintln("mTextData empty");
         return;

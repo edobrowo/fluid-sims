@@ -1,7 +1,0 @@
-{
-    "grid_rows": 16,
-    "grid_cols": 16,
-    "timestep": 0.005,
-    "density": 0.1,
-    "save_frames": true
-}

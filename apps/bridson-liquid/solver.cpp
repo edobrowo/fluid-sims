@@ -4,9 +4,11 @@ Solver::Solver(const Config& config)
     : mMac(config.rows, config.cols, config.cellSize),
       mTimestep(config.timestep),
       mDensity(config.density),
-      mAdvectDensity(mMac.d, mMac.u, mMac.v),
-      mAdvectU(mMac.u, mMac.u, mMac.v),
-      mAdvectV(mMac.v, mMac.u, mMac.v),
+      mExtrapolateU(mMac.u, mMac.label),
+      mExtrapolateV(mMac.v, mMac.label),
+      mAdvectDensity(mMac.d, mMac.u, mMac.v, mMac.label),
+      mAdvectU(mMac.u, mMac.u, mMac.v, mMac.label),
+      mAdvectV(mMac.v, mMac.u, mMac.v, mMac.label),
       mProject(mMac) {
 }
 
@@ -18,16 +20,20 @@ void Solver::step() {
     // See Page 20.
 
     // 1. Advect density and velocity.
+
     advect();
 
     // 2. Add external forces.
+
     const Vector2D pos(0.45, 0.2);
     const Vector2D size(0.1, 0.01);
     const float d = 1.0;
     const Vector2D u(0.0, 3.0);
+
     addForces(pos, size, d, u);
 
     // 3. Project the pressure to make the velocity field divergence free.
+
     project();
 }
 
@@ -47,11 +53,12 @@ const Grid& Solver::v() const {
     return mMac.v;
 }
 
-void Solver::project() {
-    mProject(mTimestep, mDensity);
-}
-
 void Solver::advect() {
+    mMac.updateLabels();
+
+    mExtrapolateU();
+    mExtrapolateV();
+
     mAdvectDensity(mTimestep);
     mAdvectDensity.swap();
 
@@ -69,4 +76,10 @@ void Solver::addForces(const Vector2D& pos,
     mMac.d.add(pos, size, d);
     mMac.u.add(pos, size, u[0]);
     mMac.v.add(pos, size, u[1]);
+
+    mMac.updateLabels();
+}
+
+void Solver::project() {
+    mProject(mTimestep, mDensity);
 }

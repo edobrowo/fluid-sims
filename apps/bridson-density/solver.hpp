@@ -2,7 +2,6 @@
 
 #include "advection.hpp"
 #include "config.hpp"
-#include "extrapolation.hpp"
 #include "grid.hpp"
 #include "mac_grid.hpp"
 #include "projection.hpp"
@@ -31,8 +30,10 @@ public:
     const Grid& v() const;
 
 private:
-    /// @brief Advects density and velocity through the current velocity grid.
-    void advect();
+    /// @brief Calculates and applies the pressure necessary to
+    ///  make u divergence free and enforces solid wall boundary
+    ///  conditions.
+    void project();
 
     /// @brief Adds external forces (density and velocity).
     void addForces(const Vector2D& pos,
@@ -40,10 +41,8 @@ private:
                    const f64 d,
                    const Vector2D& u);
 
-    /// @brief Calculates and applies the pressure necessary to
-    ///  make u divergence free and enforces solid wall boundary
-    ///  conditions.
-    void project();
+    /// @brief Advects density and velocity through the current velocity grid.
+    void advect();
 
     /// @brief MAC grid used by this solver.
     MACGrid mMac;
@@ -53,12 +52,6 @@ private:
 
     /// @brief Fluid density.
     f64 mDensity;
-
-    /// @brief Extrapolation of U.
-    Extrapolation mExtrapolateU;
-
-    /// @brief Extrapolation of V.
-    Extrapolation mExtrapolateV;
 
     /// @brief Advection over density.
     Advection mAdvectDensity;

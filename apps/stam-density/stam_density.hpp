@@ -7,12 +7,12 @@
 #include "platform/mesh.hpp"
 #include "platform/shader.hpp"
 #include "platform/texture.hpp"
-#include "stam_rtfd_solver.hpp"
+#include "solver.hpp"
 
-class StamRTFD : public Application {
+class StamDensity : public Application {
 public:
-    StamRTFD();
-    ~StamRTFD() = default;
+    StamDensity();
+    ~StamDensity() = default;
 
     virtual void init() override;
     virtual void update() override;
@@ -27,7 +27,7 @@ public:
 private:
     static constexpr u32 N = 100;
 
-    StamRTFDSolver<N> mSolver;
+    Solver<N> mSolver;
 
     gl::ShaderProgram mProgram;
     gl::Mesh mQuadMesh;

@@ -8,17 +8,16 @@
 
 // http://graphics.cs.cmu.edu/nsp/course/15-464/Fall09/papers/StamFluidforGames.pdf
 template <u32 N>
-class StamRTFDSolver {
+class Solver {
 public:
     static constexpr f32 h = 1.0f / static_cast<f32>(N);
 
     static constexpr u32 sDim = N + 2;
     static constexpr u32 sSize = sDim * sDim;
 
-    StamRTFDSolver()
-        : mU(), mV(), mUPrev(), mVPrev(), mDensity(), mDensityPrev() {
+    Solver() : mU(), mV(), mUPrev(), mVPrev(), mDensity(), mDensityPrev() {
     }
-    ~StamRTFDSolver() = default;
+    ~Solver() = default;
 
     const Grid<N>& u() const {
         return mU;
@@ -105,12 +104,12 @@ private:
 };
 
 template <u32 N>
-void StamRTFDSolver<N>::stepDensity(Grid<N>& x,
-                                    Grid<N>& x0,
-                                    Grid<N>& u,
-                                    Grid<N>& v,
-                                    const f32 diffusion,
-                                    const f32 dt) {
+void Solver<N>::stepDensity(Grid<N>& x,
+                            Grid<N>& x0,
+                            Grid<N>& u,
+                            Grid<N>& v,
+                            const f32 diffusion,
+                            const f32 dt) {
     addSource(x, x0, dt);
     std::swap(x, x0);
     diffuse(0, x, x0, diffusion, dt);
@@ -119,12 +118,12 @@ void StamRTFDSolver<N>::stepDensity(Grid<N>& x,
 }
 
 template <u32 N>
-void StamRTFDSolver<N>::stepVelocity(Grid<N>& u,
-                                     Grid<N>& v,
-                                     Grid<N>& u0,
-                                     Grid<N>& v0,
-                                     const f32 viscosity,
-                                     const f32 dt) {
+void Solver<N>::stepVelocity(Grid<N>& u,
+                             Grid<N>& v,
+                             Grid<N>& u0,
+                             Grid<N>& v0,
+                             const f32 viscosity,
+                             const f32 dt) {
     addSource(u, u0, dt);
     addSource(v, v0, dt);
 
@@ -146,13 +145,13 @@ void StamRTFDSolver<N>::stepVelocity(Grid<N>& u,
 }
 
 template <u32 N>
-void StamRTFDSolver<N>::addSource(Grid<N>& x, Grid<N>& s, const f32 dt) {
+void Solver<N>::addSource(Grid<N>& x, Grid<N>& s, const f32 dt) {
     for (Index row = 0; row < sDim; ++row)
         for (Index col = 0; col < sDim; ++col) x(row, col) += dt * s(row, col);
 }
 
 template <u32 N>
-void StamRTFDSolver<N>::diffuse(
+void Solver<N>::diffuse(
     const u32 b, Grid<N>& x, Grid<N>& x0, const f32 diffusion, const f32 dt) {
     const f32 a = dt * diffusion * N * N;
     for (Index k = 0; k < mGaussSeidelIterations; ++k) {
@@ -167,12 +166,12 @@ void StamRTFDSolver<N>::diffuse(
 }
 
 template <u32 N>
-void StamRTFDSolver<N>::advect(const u32 b,
-                               Grid<N>& d,
-                               Grid<N>& d0,
-                               Grid<N>& u,
-                               Grid<N>& v,
-                               const f32 dt) {
+void Solver<N>::advect(const u32 b,
+                       Grid<N>& d,
+                       Grid<N>& d0,
+                       Grid<N>& u,
+                       Grid<N>& v,
+                       const f32 dt) {
     const f32 dt0 = dt * N;
     for (Index row = 1; row <= N; ++row) {
         for (Index col = 1; col <= N; ++col) {
@@ -199,10 +198,7 @@ void StamRTFDSolver<N>::advect(const u32 b,
 }
 
 template <u32 N>
-void StamRTFDSolver<N>::project(Grid<N>& u,
-                                Grid<N>& v,
-                                Grid<N>& p,
-                                Grid<N>& div) {
+void Solver<N>::project(Grid<N>& u, Grid<N>& v, Grid<N>& p, Grid<N>& div) {
     for (Index row = 1; row <= N; ++row) {
         for (Index col = 1; col <= N; ++col) {
             div(row, col) = -0.5 * h *
@@ -235,7 +231,7 @@ void StamRTFDSolver<N>::project(Grid<N>& u,
 }
 
 template <u32 N>
-void StamRTFDSolver<N>::setBoundary(const u32 b, Grid<N>& x) {
+void Solver<N>::setBoundary(const u32 b, Grid<N>& x) {
     for (Index i = 1; i <= N; ++i) {
         x(i, 0) = b == 1 ? -x(i, 1) : x(i, 1);
         x(i, N + 1) = b == 1 ? -x(i, N) : x(i, N);

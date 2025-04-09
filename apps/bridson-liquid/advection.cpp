@@ -1,13 +1,17 @@
 #include "advection.hpp"
 
-Advection::Advection(Grid& q, Grid& u, Grid& v)
-    : mQ(q), mU(u), mV(v), mBack(q) {
+Advection::Advection(Grid& q, Grid& u, Grid& v, LabelGrid& label)
+    : mQ(q), mU(u), mV(v), mLabel(label), mBack(q) {
 }
 
 void Advection::operator()(const f64 dt) {
     // Page 32.
     for (i32 j = 0; j < mQ.ny(); ++j) {
         for (i32 i = 0; i < mQ.nx(); ++i) {
+            if (mLabel.isSolid(i, j)) {
+                continue;
+            }
+
             // Construct the gridspace position at the current cell center.
             const Vector2D grid_pos = Vector2D(i, j) + mQ.cellCenter();
 

@@ -12,7 +12,7 @@ public:
     void operator()(const f64 dt, const f64 density);
 
 private:
-    const Size cNumberOfCGIterations = 200;
+    const Size cNumberOfCGIterations = 1000;
 
     /// @brief MAC grid. Projection acts on the pressure component.
     MACGrid& mMac;
@@ -27,6 +27,10 @@ private:
     std::vector<f64> mAx;
     std::vector<f64> mAy;
 
+    /// @brief Fluid cell indices for sparse grid access.
+    std::vector<f64> mFluidIndices;
+    i32 mFluidCount;
+
     /// @brief Pressure solution vector.
     VectorXD mPressure;
 
@@ -38,6 +42,9 @@ private:
 
     /// @brief Preconditioner.
     VectorXD mPreconditioner;
+
+    /// @brief Associates an index with every fluid cell.
+    void indexFluidCells();
 
     /// @brief Builds the divergence vector (div).
     void buildDivergences();

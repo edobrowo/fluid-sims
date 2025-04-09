@@ -1,13 +1,12 @@
 #pragma once
 
 #include "grid.hpp"
-#include "label_grid.hpp"
 #include "math/vector.hpp"
 #include "util/common.hpp"
 
 class MACGrid {
 public:
-    MACGrid(const i32 rows, const i32 cols, const f32 cell_size);
+    MACGrid(const i32 rows, const i32 cols, const f64 cell_size);
     ~MACGrid() = default;
 
     /// @brief Velocity x-component.
@@ -22,9 +21,6 @@ public:
     /// @brief Density.
     Grid d;
 
-    /// @brief Cell labels.
-    LabelGrid label;
-
     /// @brief Number of columns in the MAC grid.
     i32 nx() const;
 
@@ -35,24 +31,21 @@ public:
     i32 cellCount() const;
 
     /// @brief Size of a cell in world space.
-    f32 cellSize() const;
-
-    /// @brief Updates cell labels.
-    void updateLabels();
+    f64 cellSize() const;
 
 private:
     /// @brief Width of the MAC grid in world space. Equal to nx() * cellSize().
-    f32 width() const;
+    f64 width() const;
 
     /// @brief Height of the MAC grid in world space. Equal to ny() *
     /// cellSize().
-    f32 height() const;
+    f64 height() const;
 
     /// @brief Uses the CFL heuristic to determine a large timestep.
-    f32 cflTimestep() const;
+    f64 cflTimestep() const;
 
     i32 mNx;
     i32 mNy;
 
-    f32 mCellSize;
+    f64 mCellSize;
 };
