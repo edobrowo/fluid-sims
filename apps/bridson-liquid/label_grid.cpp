@@ -34,8 +34,16 @@ bool LabelGrid::isFluid(const i32 i, const i32 j) const {
     return (*this)(i, j) == Label::Fluid;
 }
 
+bool LabelGrid::isExtrapolated(const i32 i, const i32 j) const {
+    return (*this)(i, j) == Label::Extrapolated;
+}
+
 bool LabelGrid::isSolid(const i32 i, const i32 j) const {
     return (*this)(i, j) == Label::Solid;
+}
+
+bool LabelGrid::isNearFluid(const i32 i, const i32 j) const {
+    return isFluid(i, j) || isExtrapolated(i, j);
 }
 
 i32 LabelGrid::nx() const {
@@ -67,5 +75,14 @@ void LabelGrid::setSolidBorder() {
     for (i32 i = 0; i < mNx; ++i) {
         set(i, 0, Label::Solid);
         set(i, mNy - 1, Label::Solid);
+    }
+}
+
+void LabelGrid::reset() {
+    for (i32 j = 0; j < mNy; ++j) {
+        for (i32 i = 0; i < mNx; ++i) {
+            if (isNearFluid(i, j))
+                set(i, j, Label::Empty);
+        }
     }
 }

@@ -9,10 +9,21 @@ public:
 
     ~Extrapolation() = default;
 
-    /// @brief Extrapolates the grid to empty cells `n` times.
+    /// @brief Fully extrapolates the grid into empty cells.
     void operator()();
 
+    /// @brief Extrapolates the grid `n` times.
+    void operator()(const u32 n);
+
 private:
+    enum class Result {
+        Updated = 0,
+        FixedPoint
+    };
+
+    /// @brief Performs a single extrapolation step.
+    Result step();
+
     Grid& mQ;
     LabelGrid& mLabel;
 

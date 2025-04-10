@@ -29,14 +29,8 @@ void Projection::operator()(const f64 dt, const f64 density) {
 
     indexFluidCells();
     buildDivergences();
-    // println("mDiv\n{}", mDiv);
     buildPressureMatrix(dt, density);
-    // println("mAdiag\n{}", mAdiag);
-    // println("mAx\n{}", mAx);
-    // println("mAy\n{}", mAy);
     solvePressureEquation(tau, sigma);
-    // println("mPrecon\n{}", mPreconditioner);
-    // println("mPressure\n{}", mPressure);
 
     mMac.p.fill(0.0);
 
@@ -51,8 +45,6 @@ void Projection::operator()(const f64 dt, const f64 density) {
     }
 
     applyPressureUpdate(dt, density);
-    // println("U\n{}", mMac.u);
-    // println("V\n{}", mMac.v);
 }
 
 void Projection::indexFluidCells() {

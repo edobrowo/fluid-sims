@@ -30,6 +30,9 @@ public:
     /// @brief Retrieve a constant reference to the velocity v component grid.
     const Grid& v() const;
 
+    /// @brief Retrieve a constant reference to the label grid.
+    const LabelGrid& label() const;
+
 private:
     /// @brief Advects density and velocity through the current velocity grid.
     void advect();

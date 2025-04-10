@@ -6,6 +6,7 @@
 enum class Label {
     Empty = 0,
     Fluid,
+    Extrapolated,
     Solid
 };
 
@@ -19,14 +20,20 @@ public:
     /// @brief Sets the label at cell indices (i, j).
     void set(const i32 i, const i32 j, const Label label);
 
-    /// @brief Indicates whether the specified cell is an Empty cell.
+    /// @brief Indicates whether the specified cell is Empty.
     bool isEmpty(const i32 i, const i32 j) const;
 
-    /// @brief Indicates whether the specified cell is a Fluid cell.
+    /// @brief Indicates whether the specified cell is Fluid.
     bool isFluid(const i32 i, const i32 j) const;
 
-    /// @brief Indicates whether the specified cell is a Solid cell.
+    /// @brief Indicates whether the specified cell is Extrapolated.
+    bool isExtrapolated(const i32 i, const i32 j) const;
+
+    /// @brief Indicates whether the specified cell is Solid.
     bool isSolid(const i32 i, const i32 j) const;
+
+    /// @brief Indicates whether the specified cell is Fluid or Extrapolated.
+    bool isNearFluid(const i32 i, const i32 j) const;
 
     /// @brief Number of columns in the grid.
     i32 nx() const;
@@ -43,8 +50,11 @@ public:
     /// @brief Fill the grid with the specified label.
     void fill(const Label label);
 
-    /// @brief Sets the edge cells to Label::Solid.
+    /// @brief Sets the edge cells to `Label::Solid`.
     void setSolidBorder();
+
+    /// @brief Sets all fluid cells to `Label::Empty`.
+    void reset();
 
 private:
     /// @brief Number of columns in the grid.
@@ -66,6 +76,9 @@ struct FormatWriter<Label> {
             return;
         case Label::Fluid:
             sb.putSafe('F');
+            return;
+        case Label::Extrapolated:
+            sb.putSafe('E');
             return;
         case Label::Solid:
             sb.putSafe('S');

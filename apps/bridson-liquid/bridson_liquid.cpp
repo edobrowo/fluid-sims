@@ -120,6 +120,10 @@ void BridsonLiquid::onKeyPress(int key, int action, int mods) {
             // Print velocity v component.
             println("V\n{}", mSolver->v());
             break;
+        case GLFW_KEY_L:
+            // Print labels.
+            println("LABELS\n{}", mSolver->label());
+            break;
         default:
             break;
         }

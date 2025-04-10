@@ -5,6 +5,21 @@ Extrapolation::Extrapolation(Grid& q, LabelGrid& label)
 }
 
 void Extrapolation::operator()() {
+    Extrapolation::Result result = Result::Updated;
+    do {
+        result = step();
+    } while (result == Result::Updated);
+}
+
+void Extrapolation::operator()(const u32 n) {
+    for (u32 i = 0; i < n; ++i) {
+        static_cast<void>(step());
+    }
+}
+
+Extrapolation::Result Extrapolation::step() {
+    Extrapolation::Result result = Extrapolation::Result::FixedPoint;
+
     for (i32 j = 0; j < mQ.ny(); ++j) {
         for (i32 i = 0; i < mQ.nx(); ++i) {
             if (mLabel.isEmpty(i, j)) {
@@ -32,7 +47,9 @@ void Extrapolation::operator()() {
                 }
 
                 if (neighbour_count > 0) {
+                    mLabel.set(i, j, Label::Extrapolated);
                     mBack(i, j) = value / static_cast<f64>(neighbour_count);
+                    result = Extrapolation::Result::Updated;
                 }
             } else {
                 mBack(i, j) = mQ(i, j);
@@ -41,4 +58,5 @@ void Extrapolation::operator()() {
     }
 
     std::swap(mQ, mBack);
+    return result;
 }
