@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include "util/log.hpp"
+
 Projection::Projection(MACGrid& mac)
     : mMac(mac),
       mDiv(mac.cellCount()),
@@ -107,8 +109,10 @@ void Projection::solvePressureEquation(const f64 tuning, const f64 safety) {
         mPressure = mPressure + alpha * mSearch;
         mDiv = mDiv + -alpha * mAux;
 
-        if (mDiv.infinityNorm() < tol)
+        if (mDiv.infinityNorm() < tol) {
+            Log::d("CG solved after {} iterations", iter);
             return;
+        }
 
         applyPreconditioner(mAux, mDiv);
 
@@ -118,6 +122,8 @@ void Projection::solvePressureEquation(const f64 tuning, const f64 safety) {
         mSearch = mAux + beta * mSearch;
         sigma = sigma_new;
     }
+
+    Log::w("CG exceeded iteration count maximum of {}", cNumberOfCGIterations);
 }
 
 void Projection::applyPressureUpdate(const f64 dt, const f64 density) {

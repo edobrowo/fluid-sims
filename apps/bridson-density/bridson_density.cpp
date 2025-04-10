@@ -8,6 +8,7 @@
 
 #include "quad.hpp"
 #include "util/files.hpp"
+#include "util/log.hpp"
 
 BridsonLiquid::BridsonLiquid() : mUpdateOnce(false), mUpdateContinuous(false) {
 }
@@ -53,25 +54,23 @@ void BridsonLiquid::init() {
 }
 
 void BridsonLiquid::update() {
-    if (mUpdateOnce || mUpdateContinuous) {
+    if (mUpdateOnce || mUpdateContinuous)
         mSolver->step();
-        mUpdateOnce = false;
-    }
 }
 
 void BridsonLiquid::draw() {
     for (Index row = 0; row < mConfig.rows; ++row) {
         for (Index col = 0; col < mConfig.cols; ++col) {
-            const f32 d = mSolver->color(
-                Vector2i(static_cast<i32>(col), static_cast<i32>(row)));
+            const f64 d = mSolver->density()(static_cast<i32>(col),
+                                             static_cast<i32>(row));
 
             const GLubyte b =
-                static_cast<GLubyte>(math::clamp(d, 0.0f, 1.0f) * 255.0f);
+                static_cast<GLubyte>(math::clamp(d, 0.0, 1.0) * 255.0);
 
             const Index i = row * mConfig.cols + col;
-            mTexData[i * 3] = b;
+            mTexData[i * 3] = 0;
             mTexData[i * 3 + 1] = b;
-            mTexData[i * 3 + 2] = b;
+            mTexData[i * 3 + 2] = 0;
         }
     }
 
@@ -80,11 +79,14 @@ void BridsonLiquid::draw() {
 
     mQuadMesh.render();
 
-    if (mConfig.saveFrames) {
-        saveCurrentFrame();
-    }
+    if (mUpdateOnce || mUpdateContinuous) {
+        Log::i("Frame {}", mFrameCounter);
+        if (mConfig.saveFrames)
+            saveCurrentFrame();
 
-    ++mFrameCounter;
+        ++mFrameCounter;
+        mUpdateOnce = false;
+    }
 }
 
 void BridsonLiquid::onKeyPress(int key, int action, int mods) {
@@ -130,7 +132,7 @@ void BridsonLiquid::onFramebufferResize(const u32 width, const u32 height) {
 
 void BridsonLiquid::saveCurrentFrame() const {
     if (mTexData.empty()) {
-        eprintln("mTextData empty");
+        Log::f("mTextData empty");
         return;
     }
 
@@ -147,7 +149,6 @@ void BridsonLiquid::saveCurrentFrame() const {
                                      mTexData.data(),
                                      static_cast<int>(mConfig.cols * 3));
 
-    if (!error) {
-        eprintln("Failed to save the current frame");
-    }
+    if (!error)
+        Log::f("Failed to save the current frame");
 }

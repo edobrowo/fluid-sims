@@ -8,22 +8,21 @@ public:
 
     /// @brief Advects the grid through the specified velocity field
     ///  for the given time step, producing a new grid.
-    /// @param u Velocity field along the x axis.
-    /// @param v Velocity field along the y axis.
-    /// @return Grid at the updated state.
     void operator()(const f64 dt);
 
-    /// @brief Swaps the back buffer grid with mQ. Necessary self-advection.
+    /// @brief Swaps the back buffer grid with mQ. This must be a separate
+    /// operation to support self-advection.
     void swap();
 
 private:
     Grid& mQ;
     Grid& mU;
     Grid& mV;
+
     Grid mBack;
 
     /// @brief Determines the initial position of an imaginary particle with
-    /// current position pos integrated back in time by dt.
+    /// current gridspace position `grid_pos` integrated back in time by dt.
     Vector2D backtrace(const Vector2D& grid_pos, const f64 dt) const;
 
     /// @brief Integrates back in time using Euler.

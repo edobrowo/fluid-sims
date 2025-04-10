@@ -14,7 +14,7 @@ void Advection::operator()(const f64 dt) {
             // Semi-Lagrangian backwards integration in time over (u, v).
             const Vector2D initial_pos = backtrace(grid_pos, dt);
 
-            // Interpolate from from the grid and set the new value.
+            // Interpolate from the grid and set the new value.
             mBack(i, j) = mQ.interp(initial_pos);
         }
     }

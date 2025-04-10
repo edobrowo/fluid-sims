@@ -44,7 +44,11 @@ Grid& Grid::operator=(const Grid& other) {
     mNy = other.mNy;
     mCellCenter = other.mCellCenter;
     mCellSize = other.mCellSize;
+
+    delete[] mData;
+    mData = new f64[mNx * mNy];
     std::copy(other.mData, other.mData + (mNx * mNy), mData);
+
     return *this;
 }
 

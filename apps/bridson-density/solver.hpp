@@ -9,10 +9,8 @@
 class Solver {
 public:
     Solver(const Config& config);
-    ~Solver() = default;
 
-    /// @brief Retrieves the color at the specified cell.
-    f64 color(const Vector2i& cell) const;
+    ~Solver() = default;
 
     /// @brief Updates the solver by mTimestep.
     void step();
@@ -30,19 +28,15 @@ public:
     const Grid& v() const;
 
 private:
-    /// @brief Calculates and applies the pressure necessary to
-    ///  make u divergence free and enforces solid wall boundary
-    ///  conditions.
-    void project();
-
-    /// @brief Adds external forces (density and velocity).
-    void addForces(const Vector2D& pos,
-                   const Vector2D& size,
-                   const f64 d,
-                   const Vector2D& u);
-
-    /// @brief Advects density and velocity through the current velocity grid.
+    /// @brief Advects density and velocity through the velocity grid.
     void advect();
+
+    /// @brief Adds external forces.
+    void addForces();
+
+    /// @brief Calculates and applies the pressure necessary to make u
+    /// divergence free and enforces solid wall boundary conditions.
+    void project();
 
     /// @brief MAC grid used by this solver.
     MACGrid mMac;
