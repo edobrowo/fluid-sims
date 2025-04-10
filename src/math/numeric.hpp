@@ -15,8 +15,14 @@ constexpr inline T abs(T value) {
 
 /// @brief Sign function.
 template <Numeric T>
-constexpr inline T sgn(T value) {
+constexpr inline T signum(T value) {
     return -T(value < T(0)) + T(value > T(0));
+}
+
+/// @brief Sign function that returns -1 if `value` is 0 (zero to negative).
+template <Numeric T>
+constexpr inline T signum_ztn(T value) {
+    return -T(value <= T(0)) + T(value > T(0));
 }
 
 /// @brief Square function.

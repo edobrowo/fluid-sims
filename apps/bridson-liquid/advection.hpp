@@ -24,7 +24,7 @@ private:
     Grid mBack;
 
     /// @brief Determines the initial position of an imaginary particle with
-    /// current position pos integrated back in time by dt.
+    /// current gridspace position `grid_pos` integrated back in time by dt.
     Vector2D backtrace(const Vector2D& grid_pos, const f64 dt) const;
 
     /// @brief Integrates back in time using Euler.

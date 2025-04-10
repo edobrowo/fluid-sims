@@ -57,6 +57,9 @@ public:
     /// @return Computed value at the worldspace position.
     f64 interp(const Vector2D& grid_pos) const;
 
+    /// @brief Computes the gradient at the given gridspace position.
+    Vector2D grad(const Vector2D& grid_pos) const;
+
     /// @brief Fill the grid with a constant value.
     /// @param value Fill value.
     void fill(const f64 value);

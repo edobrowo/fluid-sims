@@ -14,6 +14,10 @@ class LabelGrid {
 public:
     LabelGrid(const i32 nx, const i32 ny);
 
+    LabelGrid(const LabelGrid& other);
+
+    LabelGrid& operator=(const LabelGrid& other);
+
     /// @brief Retrives the label at cell indices (i, j).
     Label operator()(const i32 i, const i32 j) const;
 

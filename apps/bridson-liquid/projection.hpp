@@ -9,7 +9,7 @@ public:
     Projection(MACGrid& mac);
 
     // Projects using Conjugate Gradient with a Cholesky preconditioner.
-    void operator()(const f64 dt, const f64 density);
+    void operator()(const f64 dt);
 
 private:
     const Size cNumberOfCGIterations = 1000;
@@ -50,7 +50,7 @@ private:
     void buildDivergences();
 
     /// @brief Builds the pressure matrix.
-    void buildPressureMatrix(const f64 dt, const f64 density);
+    void buildPressureMatrix(const f64 dt);
 
     /// @brief Solves the Poisson equation for pressure projection using
     /// Conjugate Gradient iteration.
@@ -58,7 +58,7 @@ private:
 
     /// @brief Applies the pressure update to the velocity field. Enforces the
     /// velocity field to be divergence-free.
-    void applyPressureUpdate(const f64 dt, const f64 density);
+    void applyPressureUpdate(const f64 dt);
 
     /// @brief Builds the preconditioner.
     void buildPreconditioner(const f64 tuning, const f64 safety);

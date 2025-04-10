@@ -44,7 +44,11 @@ Grid& Grid::operator=(const Grid& other) {
     mNy = other.mNy;
     mCellCenter = other.mCellCenter;
     mCellSize = other.mCellSize;
+
+    delete[] mData;
+    mData = new f64[mNx * mNy];
     std::copy(other.mData, other.mData + (mNx * mNy), mData);
+
     return *this;
 }
 
@@ -104,6 +108,33 @@ Vector2D Grid::toWorldSpace(const Vector2D& grid_pos) const {
 
 f64 Grid::interp(const Vector2D& grid_pos) const {
     return cerp(grid_pos);
+}
+
+Vector2D Grid::grad(const Vector2D& grid_pos) const {
+    const i32 i = static_cast<i32>(std::floor(grid_pos[0]));
+    const i32 j = static_cast<i32>(std::floor(grid_pos[1]));
+
+    Vector2D g(0.0);
+
+    if (i == 0)
+        g[0] = (*this)(i, j) - (*this)(i + 1, j);
+    else if (i == nx() - 1)
+        g[0] = (*this)(i - 1, j) - (*this)(i, j);
+    else if (math::abs((*this)(i - 1, j)) < math::abs((*this)(i + 1, j)))
+        g[0] = (*this)(i, j) - (*this)(i + 1, j);
+    else
+        g[0] = (*this)(i - 1, j) - (*this)(i, j);
+
+    if (j == 0)
+        g[1] = (*this)(i, j) - (*this)(i, j + 1);
+    else if (j == ny() - 1)
+        g[1] = (*this)(i, j - 1) - (*this)(i, j);
+    else if (math::abs((*this)(i, j - 1)) < math::abs((*this)(i, j + 1)))
+        g[1] = (*this)(i, j) - (*this)(i, j + 1);
+    else
+        g[1] = (*this)(i, j - 1) - (*this)(i, j);
+
+    return g;
 }
 
 void Grid::fill(const f64 value) {

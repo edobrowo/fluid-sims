@@ -18,7 +18,7 @@ Projection::Projection(MACGrid& mac)
       mPreconditioner(mMac.cellCount()) {
 }
 
-void Projection::operator()(const f64 dt, const f64 density) {
+void Projection::operator()(const f64 dt) {
     // In general, projection subtracts the pressure gradient from the advected
     // velocity field with external forces applied and enforces the velocity
     // field to be divergence-free. Following Bridson, it also enforces
@@ -29,7 +29,7 @@ void Projection::operator()(const f64 dt, const f64 density) {
 
     indexFluidCells();
     buildDivergences();
-    buildPressureMatrix(dt, density);
+    buildPressureMatrix(dt);
     solvePressureEquation(tau, sigma);
 
     mMac.p.fill(0.0);
@@ -44,7 +44,7 @@ void Projection::operator()(const f64 dt, const f64 density) {
         }
     }
 
-    applyPressureUpdate(dt, density);
+    applyPressureUpdate(dt);
 }
 
 void Projection::indexFluidCells() {
@@ -104,10 +104,10 @@ void Projection::buildDivergences() {
     }
 }
 
-void Projection::buildPressureMatrix(const f64 dt, const f64 density) {
+void Projection::buildPressureMatrix(const f64 dt) {
     // Page 78, Figure 5.5.
 
-    const f64 scale = dt / (density * mMac.cellSize() * mMac.cellSize());
+    const f64 scale = dt / (mMac.cellSize() * mMac.cellSize());
 
     mAdiag.resize(mFluidCount);
     std::fill(mAdiag.begin(), mAdiag.end(), 0.0);
@@ -197,10 +197,10 @@ void Projection::solvePressureEquation(const f64 tuning, const f64 safety) {
     Log::w("CG exceeded iteration count maximum of {}", cNumberOfCGIterations);
 }
 
-void Projection::applyPressureUpdate(const f64 dt, const f64 density) {
+void Projection::applyPressureUpdate(const f64 dt) {
     // Based on page 71, Figure 5.2.
 
-    const f64 scale = dt / (density * mMac.cellSize());
+    const f64 scale = dt / mMac.cellSize();
 
     // Application of Equation 5.1.
     for (i32 j = 0; j < mMac.ny(); ++j) {

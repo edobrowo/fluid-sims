@@ -6,20 +6,18 @@
 #include "grid.hpp"
 #include "mac_grid.hpp"
 #include "projection.hpp"
+#include "redistancing.hpp"
 
 class Solver {
 public:
     Solver(const Config& config);
     ~Solver() = default;
 
-    /// @brief Retrieves the color at the specified cell.
-    f64 color(const Vector2i& cell) const;
-
     /// @brief Updates the solver by mTimestep.
     void step();
 
-    /// @brief Retrieve a constant reference to the density grid.
-    const Grid& density() const;
+    /// @brief Retrieve a constant reference to the surface level set.
+    const Grid& surface() const;
 
     /// @brief Retrieve a constant reference to the pressure grid.
     const Grid& pressure() const;
@@ -34,18 +32,14 @@ public:
     const LabelGrid& label() const;
 
 private:
-    /// @brief Advects density and velocity through the current velocity grid.
+    /// @brief Advects the surface and velocity through the velocity grid.
     void advect();
 
-    /// @brief Adds external forces (density and velocity).
-    void addForces(const Vector2D& pos,
-                   const Vector2D& size,
-                   const f64 d,
-                   const Vector2D& u);
+    /// @brief Adds external forces.
+    void addForces();
 
-    /// @brief Calculates and applies the pressure necessary to
-    ///  make u divergence free and enforces solid wall boundary
-    ///  conditions.
+    /// @brief Calculates and applies the pressure necessary to make u
+    /// divergence free and enforces solid wall boundary conditions.
     void project();
 
     /// @brief MAC grid used by this solver.
@@ -54,17 +48,17 @@ private:
     /// @brief Timestep that the solver is advanced by each step.
     f64 mTimestep;
 
-    /// @brief Fluid density.
-    f64 mDensity;
-
     /// @brief Extrapolation of U.
     Extrapolation mExtrapolateU;
 
     /// @brief Extrapolation of V.
     Extrapolation mExtrapolateV;
 
-    /// @brief Advection over density.
-    Advection mAdvectDensity;
+    /// @brief Advection over surface level set.
+    Advection mAdvectSurface;
+
+    /// @brief Redistancing over surface.
+    Redistancing mRedistanceSurface;
 
     /// @brief Advection over U.
     Advection mAdvectU;

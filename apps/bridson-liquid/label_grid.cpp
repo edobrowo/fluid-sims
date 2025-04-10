@@ -9,6 +9,22 @@ LabelGrid::LabelGrid(const i32 nx, const i32 ny) : mNx(nx), mNy(ny) {
     mData = new Label[mNx * mNy];
 }
 
+LabelGrid::LabelGrid(const LabelGrid& other)
+    : mNx(other.mNx), mNy(other.mNy), mData(new Label[other.mNx * other.mNy]) {
+    std::copy(other.mData, other.mData + (mNx * mNy), mData);
+}
+
+LabelGrid& LabelGrid::operator=(const LabelGrid& other) {
+    mNx = other.mNx;
+    mNy = other.mNy;
+
+    delete[] mData;
+    mData = new Label[mNx * mNy];
+    std::copy(other.mData, other.mData + (mNx * mNy), mData);
+
+    return *this;
+}
+
 Label LabelGrid::operator()(const i32 i, const i32 j) const {
     if (0 <= i && i < mNx && 0 <= j && j < mNy) {
         return mData[j * mNx + i];

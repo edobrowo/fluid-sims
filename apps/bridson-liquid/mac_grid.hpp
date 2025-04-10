@@ -19,8 +19,8 @@ public:
     /// @brief Pressure.
     Grid p;
 
-    /// @brief Density.
-    Grid d;
+    /// @brief Surface level set.
+    Grid s;
 
     /// @brief Cell labels.
     LabelGrid label;

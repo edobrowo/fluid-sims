@@ -4,7 +4,7 @@ MACGrid::MACGrid(const i32 rows, const i32 cols, const f32 cell_size)
     : u(rows, cols + 1, Vector2D(0.0, 0.5), cell_size),
       v(rows + 1, cols, Vector2D(0.5, 0.0), cell_size),
       p(rows, cols, Vector2D(0.5, 0.5), cell_size),
-      d(rows, cols, Vector2D(0.5, 0.5), cell_size),
+      s(rows, cols, Vector2D(0.5, 0.5), cell_size),
       label(rows, cols),
       mNx(cols),
       mNy(rows),
@@ -12,7 +12,7 @@ MACGrid::MACGrid(const i32 rows, const i32 cols, const f32 cell_size)
     u.fill(0.0);
     v.fill(0.0);
     p.fill(0.0);
-    d.fill(0.0);
+    s.fill(0.0);
 
     label.fill(Label::Empty);
     label.setSolidBorder();
@@ -37,14 +37,14 @@ f32 MACGrid::cellSize() const {
 void MACGrid::updateLabels() {
     label.reset();
 
-    // A cell has fluid in it if it has non-zero density.
+    // A cell has fluid in it if the level set value at that cell is negative.
     for (i32 j = 0; j < mNy; ++j) {
         for (i32 i = 0; i < mNx; ++i) {
             if (label.isSolid(i, j)) {
                 continue;
             }
 
-            if (d(i, j) > 0.0) {
+            if (s(i, j) < 0.0) {
                 label.set(i, j, Label::Fluid);
             } else {
                 label.set(i, j, Label::Empty);

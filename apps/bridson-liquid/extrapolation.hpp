@@ -10,10 +10,10 @@ public:
     ~Extrapolation() = default;
 
     /// @brief Fully extrapolates the grid into empty cells.
-    void operator()();
+    void operator()(const LabelGrid& label);
 
     /// @brief Extrapolates the grid `n` times.
-    void operator()(const u32 n);
+    void operator()(const u32 n, const LabelGrid& label);
 
 private:
     enum class Result {
@@ -25,7 +25,9 @@ private:
     Result step();
 
     Grid& mQ;
-    LabelGrid& mLabel;
 
     Grid mBack;
+
+    LabelGrid mLabel;
+    LabelGrid mLabelBack;
 };
